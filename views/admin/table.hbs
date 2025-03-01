@@ -1,0 +1,31 @@
+<h3>Edit Table: {{table.tableName}}</h3>
+<form action="/admin/table/update/{{table._id}}" method="POST">
+    <div class="mb-3">
+        <label>Table Name</label>
+        <input type="text" name="tableName" value="{{table.tableName}}" class="form-control">
+    </div>
+
+    <table class="table">
+        <thead>
+            <tr>
+                {{#each table.columns}}
+                <th>{{this.name}}</th>
+                {{/each}}
+            </tr>
+        </thead>
+        <tbody>
+            {{#each table.data}}
+            <tr>
+                {{#each columns}}
+                <td>
+                    <input type="text" name="data[{{@../index}}][columns][{{@index}}][value]" value="{{this.value}}" class="form-control">
+                    <input type="hidden" name="data[{{@../index}}][columns][{{@index}}][columnName]" value="{{this.columnName}}">
+                </td>
+                {{/each}}
+            </tr>
+            {{/each}}
+        </tbody>
+    </table>
+
+    <button class="btn btn-primary w-100">Update Table</button>
+</form>

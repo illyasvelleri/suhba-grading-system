@@ -1,0 +1,74 @@
+<h2>{{section.name}} - Tables</h2>
+<form action="/admin/table/create" method="POST">
+    <input type="hidden" name="sectionId" value="{{section._id}}" required>
+    <h5>Section Name: {{section.name}}</h5>
+    <div class="mb-3">
+        <label class="form-label">Table Name</label>
+        <input type="text" name="tableName" class="form-control" required>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">How Many Rows?</label>
+        <input type="number" name="rowsCount" id="rowsCount" class="form-control" min="2" max="15" required>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">How Many Columns?</label>
+        <input type="number" name="columnsCount" id="columnsCount" class="form-control" min="2" max="15" required>
+    </div>
+
+    <div id="columnNames" class="mb-3"></div>
+
+    <button class="btn btn-primary w-100">Create Table</button>
+</form>
+<h3>Existing Tables</h3>
+<table>
+    {{#each tables}}
+    <tr>
+        <td>{{this.tableName}}</td>
+        <td><button onclick="editTable('{{this._id}}')">Edit</button></td>
+        <td><button onclick="deleteTable('{{this._id}}')">Delete</button></td>
+    </tr>
+    {{/each}}
+</table>
+
+
+<script>
+    document.getElementById('columnsCount').addEventListener('input', function () {
+        const count = parseInt(this.value);
+        const container = document.getElementById('columnNames');
+        container.innerHTML = '';
+
+        for (let i = 0; i < count; i++) {
+            container.innerHTML += `
+                <div class="mb-3">
+                    <label>Column Name ${i + 1}</label>
+                    <input type="text" name="columnName${i}" class="form-control" required>
+
+                    <select name="columnType${i}" class="form-control">
+                        <option value="text">Text</option>
+                        <option value="radio">Radio</option>
+                        <option value="marks">Marks</option>
+                    </select>
+
+                    <label>Allow User Input?</label>
+                    <input type="checkbox" name="isEditable${i}">
+                </div>
+            `;
+        }
+    });
+</script>
+
+<script>
+    async function editTable(tableId) {
+        const confirmEdit = confirm("Are you sure you want to edit?");
+        if (confirmEdit) {
+            window.location.href = `/admin/table/edit/${tableId}`; // Redirect Page
+        }
+    }
+    async function deleteTable(tableId) {
+        const confirmDelete = confirm("Are you sure?");
+        if (confirmDelete) {
+            await fetch(`/admin/table/delete/${tableId}`, { method: "DELETE" });
+            location.reload();
+        }
+    }
+</script>

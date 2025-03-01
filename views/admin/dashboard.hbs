@@ -1,0 +1,39 @@
+<div class="container py-5">
+    <h1 class="text-center mb-4 fw-bold">Admin Dashboard</h1>
+
+    <div class="card shadow-lg border-0 mb-4 p-4">
+        <h3 class="mb-3 text-primary">Create Section</h3>
+        <form action="/admin/section" method="POST" class="row g-3">
+            <div class="col-md-6">
+                <input type="text" name="name" class="form-control" placeholder="Section Name" required>
+            </div>
+            <div class="col-md-6">
+                <input type="number" name="number" class="form-control" placeholder="Number" required>
+            </div>
+            <div class="text-center">
+                <button type="submit" class="btn btn-primary btn-lg px-4">Create Section</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="row g-3">
+        {{#each sections}}
+        <div class="col-md-4">
+            <button class="btn btn-primary w-100 section-btn shadow-sm py-3" data-id="{{this._id}}">
+                <div class="fw-bold">{{this.name}}</div>
+                <div class="small text-muted">Number: {{this.number}}</div>
+            </button>
+        </div>
+        {{/each}}
+    </div>
+
+</div>
+
+<style>
+    .section-btn:hover {
+        background: linear-gradient(145deg, #0d6efd, #0048b7);
+        color: #fff;
+        transform: scale(1.05);
+        transition: 0.3s ease;
+    }
+</style>
