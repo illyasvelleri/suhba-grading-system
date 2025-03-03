@@ -1,34 +1,85 @@
-<h2>{{section.name}} - Tables</h2>
-<form action="/admin/table/create" method="POST">
-    <input type="hidden" name="sectionId" value="{{section._id}}" required>
-    <h5>Section Name: {{section.name}}</h5>
-    <div class="mb-3">
-        <label class="form-label">Table Name</label>
-        <input type="text" name="tableName" class="form-control" required>
-    </div>
-    <div class="mb-3">
-        <label class="form-label">How Many Rows?</label>
-        <input type="number" name="rowsCount" id="rowsCount" class="form-control" min="2" max="15" required>
-    </div>
-    <div class="mb-3">
-        <label class="form-label">How Many Columns?</label>
-        <input type="number" name="columnsCount" id="columnsCount" class="form-control" min="2" max="15" required>
+<div class="container">
+    <h2 class="text-center text-secondary display-5 mb-4">{{section.name}} - Tables</h2>
+
+    <!-- Create Table Form -->
+    <div class="shadow-lg border-0 bg-dark p-4 rounded-4">
+        <form action="/admin/table/create" method="POST" class="row g-4">
+            <input type="hidden" name="sectionId" value="{{section._id}}" required>
+
+            <h5 class="text-white fw-bold">Section Name: {{section.name}}</h5>
+
+            <div class="col-md-6">
+                <label class="form-label text-white">Table Name</label>
+                <input type="text" name="tableName"
+                    class="form-control bg-transparent text-white border-white rounded-3" placeholder="Table Name"
+                    required>
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label text-white">Rows (2-15)</label>
+                <input type="number" name="rowsCount" id="rowsCount"
+                    class="form-control bg-transparent text-white border-white rounded-3" min="2" max="15" required>
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label text-white">Columns (2-15)</label>
+                <input type="number" name="columnsCount" id="columnsCount"
+                    class="form-control bg-transparent text-white border-white rounded-3" min="2" max="15" required>
+            </div>
+
+            <div id="columnNames" class="col-12"></div>
+
+            <div class="text-center">
+                <button class="btn btn-light w-100 py-2 rounded-3 shadow-sm">Create Table</button>
+            </div>
+        </form>
     </div>
 
-    <div id="columnNames" class="mb-3"></div>
+    <!-- Existing Tables -->
+    <h3 class="text-center text-secondary mt-5 mb-3">Existing Tables</h3>
+    <table class="table table-dark table-hover text-center shadow-lg rounded-4 overflow-hidden">
+        <thead>
+            <tr>
+                <th>Table Name</th>
+                <th>Edit</th>
+                <th>Delete</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{#each tables}}
+            <tr>
+                <td>{{this.tableName}}</td>
+                <td>
+                    <button onclick="editTable('{{this._id}}')" class="btn btn-outline-light btn-sm rounded-3">
+                        Edit
+                    </button>
+                </td>
+                <td>
+                    <button onclick="deleteTable('{{this._id}}')" class="btn btn-outline-danger btn-sm rounded-3">
+                        Delete
+                    </button>
+                </td>
+            </tr>
+            {{/each}}
+        </tbody>
+    </table>
+</div>
 
-    <button class="btn btn-primary w-100">Create Table</button>
-</form>
-<h3>Existing Tables</h3>
-<table>
-    {{#each tables}}
-    <tr>
-        <td>{{this.tableName}}</td>
-        <td><button onclick="editTable('{{this._id}}')">Edit</button></td>
-        <td><button onclick="deleteTable('{{this._id}}')">Delete</button></td>
-    </tr>
-    {{/each}}
-</table>
+<style>
+    input:focus {
+        background: #000;
+        color: #fff;
+        border: 2px solid white;
+        box-shadow: 0 0 15px rgba(255, 255, 255, 0.4);
+        transition: 0.3s ease-in-out;
+    }
+
+    table tbody tr:hover {
+        background: #111;
+        box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+        transition: 0.4s ease-in-out;
+    }
+</style>
 
 
 <script>
@@ -39,20 +90,29 @@
 
         for (let i = 0; i < count; i++) {
             container.innerHTML += `
-                <div class="mb-3">
-                    <label>Column Name ${i + 1}</label>
-                    <input type="text" name="columnName${i}" class="form-control" required>
+                <div class="bg-dark p-3 rounded-4 shadow-sm mb-3 border border-white">
+    <h6 class="text-light fw-bold">Column ${i + 1}</h6>
+    
+    <div class="mb-2">
+        <label class="text-white">Column Name</label>
+        <input type="text" name="columnName${i}" class="form-control bg-transparent text-white border-white rounded-3" placeholder="Column Name" required>
+    </div>
 
-                    <select name="columnType${i}" class="form-control">
-                        <option value="text">Text</option>
-                        <option value="radio">Radio</option>
-                        <option value="marks">Marks</option>
-                        <option value="max-marks">MaxMarks</option>
-                    </select>
+    <div class="mb-2">
+        <label class="text-white">Column Type</label>
+        <select name="columnType${i}" class="form-control bg-transparent text-secondary border-white rounded-3">
+            <option value="text">Text</option>
+            <option value="radio">Radio</option>
+            <option value="marks">Marks</option>
+            <option value="max-marks">MaxMarks</option>
+        </select>
+    </div>
 
-                    <label>Allow User Input?</label>
-                    <input type="checkbox" name="isEditable${i}">
-                </div>
+    <div class="form-check">
+        <input type="checkbox" class="form-check-input" name="isEditable${i}" id="editable${i}">
+        <label class="form-check-label text-white" for="editable${i}">Allow User Input?</label>
+    </div>
+</div>
             `;
         }
     });
