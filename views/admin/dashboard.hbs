@@ -1,39 +1,81 @@
-<div class="container py-5">
-    <h1 class="text-center mb-4 fw-bold">Admin Dashboard</h1>
+<div class="container py-2">
+    <div class="row g-4 align-items-stretch">
+        <!-- Profile Section -->
+        <div class="col-md-6">
+            <div class="profile text-center shadow-lg border-0 p-4 bg-white h-100">
+                <div class="image mb-3">
+                    <img src="https://imgs.search.brave.com/3FO6BISlAHtGZWZ8UKI2xBFKQKQKqDKVRpWgO8_5RLk/rs:fit:500:0:0:0/g:ce/aHR0cHM6Ly9pbWcu/ZnJlZXBpay5jb20v/cHJlbWl1bS1waG90/by9jbG9zZS11cC1w/b3J0cmFpdC1oYW5k/c29tZS1tYW4tYmFu/YW5hLXNoaXJ0LWxv/b2tpbmctZnJvbnQt/aXNvbGF0ZWQtd2hp/dGUtd2FsbF8xMDE5/NjQtMjM0My5qcGc_/c2VtdD1haXNfaHli/cmlk"
+                        alt="Profile Image" class="rounded-circle border border-4 border-white shadow-lg"
+                        style="width: 120px; height: 120px; object-fit: cover;">
+                </div>
+                <p class="mb-4 display-6 text-dark">Suhba Admin Dashboard</p>
+            </div>
+        </div>
 
-    <div class="card shadow-lg border-0 mb-4 p-4">
-        <h3 class="mb-3 text-primary">Create Section</h3>
-        <form action="/admin/section" method="POST" class="row g-3">
-            <div class="col-md-6">
-                <input type="text" name="name" class="form-control" placeholder="Section Name" required>
+        <!-- Create Section Card -->
+        <div class="col-md-6">
+            <div class="shadow-lg border-0 p-4 bg-white h-100">
+                <h3 class="mb-3 text-secondary text-center fw-bold">Create Section</h3>
+                <form action="/admin/section" method="POST" class="row g-3">
+                    <div class="col-md-6 position-relative">
+                        <label class="form-label small text-muted ms-2">Section Name</label>
+                        <input type="text" name="name" class="form-control border-0 shadow-sm custom-input py-2"
+                            placeholder="Section 1" required>
+                    </div>
+
+                    <div class="col-md-6 position-relative">
+                        <label class="form-label small text-muted ms-2">Number</label>
+                        <input type="number" name="number" class="form-control border-0 shadow-sm custom-input py-2"
+                            placeholder="1" required>
+                    </div>
+
+                    <div class="text-center">
+                        <button type="submit" class="btn btn-dark btn-m px-4 mt-3 custom-btn">Create
+                            Section</button>
+                    </div>
+                </form>
             </div>
-            <div class="col-md-6">
-                <input type="number" name="number" class="form-control" placeholder="Number" required>
-            </div>
-            <div class="text-center">
-                <button type="submit" class="btn btn-primary btn-lg px-4">Create Section</button>
-            </div>
-        </form>
+        </div>
     </div>
 
-    <div class="row g-3">
+    <div class="row g-3 mt-4">
         {{#each sections}}
         <div class="col-md-4">
-            <button class="btn btn-primary w-100 section-btn shadow-sm py-3" data-id="{{this._id}}">
-                <div class="fw-bold">{{this.name}}</div>
-                <div class="small text-muted">Number: {{this.number}}</div>
+            <button
+                class="btn btn-white w-100 section-btn shadow-lg py-4 border-0 rounded-4 position-relative overflow-hidden"
+                data-id="{{this._id}}">
+                <div class="fw-bold fs-5">{{this.name}}</div>
+                <div class="small">Number: {{this.number}}</div>
             </button>
         </div>
         {{/each}}
     </div>
-
 </div>
 
 <style>
+    .section-btn {
+        transition: all 0.4s ease-in-out;
+        border-width: 3px;
+        /* White border thickness */
+    }
+
     .section-btn:hover {
-        background: linear-gradient(145deg, #0d6efd, #0048b7);
-        color: #fff;
         transform: scale(1.05);
-        transition: 0.3s ease;
+        background: #000;
+        /* Black Background */
+        color: #fff;
+        border-color: #fff;
+        /* White Border */
+        box-shadow: 0 0 20px rgba(255, 255, 255, 0.4);
+        /* White Shadow */
+    }
+
+    .section-btn[small]:hover {
+        color: #fff;
+    }
+
+    input:focus {
+        border-color: #0d6efd;
+        box-shadow: 0 0 8px rgba(13, 110, 253, 0.5);
     }
 </style>
