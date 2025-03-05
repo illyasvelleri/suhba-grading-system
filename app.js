@@ -3,6 +3,7 @@ var express = require('express');
 var path = require('path');
 const mongoose = require("mongoose");
 const exphbs = require("express-handlebars");
+const flash = require("connect-flash");
 const session = require("express-session");
 const MongoStore = require("connect-mongo");
 const dotenv = require("dotenv");
@@ -66,7 +67,16 @@ app.use(session({
   resave: false,
   saveUninitialized: true
 }));
-app.use(express.urlencoded({ extended: false }));
+// Flash Middleware
+app.use(flash());
+
+// Global Flash Message Middleware
+app.use((req, res, next) => {
+  res.locals.success = req.flash("success");
+  res.locals.error = req.flash("error");
+  next();
+});
+app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
