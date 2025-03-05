@@ -44,123 +44,154 @@
 </head>
 
 <body>
+    <h1 class="text-center text-secondary display-6 mb-4">Edit Table: {{table.tableName}}</h1>
+    <form action="/admin/table/update/{{table._id}}" method="POST" class="container mt-4">
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped">
+                <thead class="table-warning">
+                    <tr>
+                        <th>Row Number</th>
+                        {{#each table.columns}}
+                        <th>
+                            <input type="text" class="form-control" name="columns[{{@index}}][name]"
+                                value="{{this.name}}" required>
+                            <label class="form-check-label mt-2">
+                                <input type="checkbox" class="form-check-input" name="columns[{{@index}}][isEditable]"
+                                    {{#if this.isEditable}}checked{{/if}}>
+                                Editable
+                            </label>
+                        </th>
+                        {{/each}}
+                    </tr>
+                </thead>
 
-<h1>Edit Table: {{table.tableName}}</h1>
+                <tbody>
+                    {{#each table.data}}
+                    <tr>
+                        <td>{{this.rowNumber}}</td>
+                        {{#each this.columns}}
+                        <td>
+                            <select name="data[{{@../index}}][columns][{{@index}}][type]" class="form-select"
+                                onchange="updateInput(this)">
+                                <option value="text" {{#if (eq this.type "text" )}}selected{{/if}}>Text</option>
+                                <option value="radio" {{#if (eq this.type "radio" )}}selected{{/if}}>Radio</option>
+                                <option value="marks" {{#if (eq this.type "marks" )}}selected{{/if}}>Marks</option>
+                                <option value="maxMarks" {{#if (eq this.type "maxMarks" )}}selected{{/if}}>Max Marks
+                                </option>
+                            </select>
 
-<form action="/admin/table/update/{{table._id}}" method="POST">
-    <table>
-        <thead>
-        <tr>
-            <th>Row Number</th>
-            {{#each table.columns}}
-            <th>
-                <input type="text" name="columns[{{@index}}][name]" value="{{this.name}}" required>
-                <label>
-                    <input type="checkbox" name="columns[{{@index}}][isEditable]" {{#if this.isEditable}}checked{{/if}}>
-                    Editable
-                </label>
-            </th>
-            {{/each}}
-        </tr>
-        </thead>
+                            <div class="input-box mt-2">
+                                {{#if (eq this.type "text")}}
+                                <input type="text" class="form-control"
+                                    name="data[{{@../index}}][columns][{{@index}}][value]" value="{{this.value}}">
+                                {{else if (eq this.type "radio")}}
+                                <div>
+                                    <label class="form-check-label">
+                                        <input type="radio" class="form-check-input"
+                                            name="data[{{@../index}}][columns][{{@index}}][value]" value="Yes" {{#if (eq
+                                            this.value "Yes" )}}checked{{/if}}> Yes
+                                    </label>
+                                    <label class="form-check-label ms-3">
+                                        <input type="radio" class="form-check-input"
+                                            name="data[{{@../index}}][columns][{{@index}}][value]" value="No" {{#if (eq
+                                            this.value "No" )}}checked{{/if}}> No
+                                    </label>
+                                </div>
+                                {{else if (eq this.type "marks")}}
+                                <input type="number" class="form-control"
+                                    name="data[{{@../index}}][columns][{{@index}}][value]" value="{{this.value}}"
+                                    oninput="calculateTotal()">
+                                {{else if (eq this.type "maxMarks")}}
+                                <input type="number" class="form-control"
+                                    name="data[{{@../index}}][columns][{{@index}}][value]" value="{{this.value}}"
+                                    oninput="calculateTotal()">
+                                {{/if}}
+                            </div>
+                        </td>
+                        {{/each}}
+                    </tr>
+                    {{/each}}
+                </tbody>
 
-        <tbody>
-        {{#each table.data}}
-        <tr>
-            <td>{{this.rowNumber}}</td>
-            {{#each this.columns}}
-            <td>
-                <select name="data[{{@../index}}][columns][{{@index}}][type]" onchange="updateInput(this)">
-                    <option value="text" {{#if (eq this.type "text")}}selected{{/if}}>Text</option>
-                    <option value="radio" {{#if (eq this.type "radio")}}selected{{/if}}>Radio</option>
-                    <option value="marks" {{#if (eq this.type "marks")}}selected{{/if}}>Marks</option>
-                    <option value="maxMarks" {{#if (eq this.type "maxMarks")}}selected{{/if}}>Max Marks</option>
-                </select>
+                <tfoot>
+                    <tr>
+                        <td colspan="100%">
+                            <div id="totalMarksBox" class="total-box alert alert-primary mt-3" style="display: none;">
+                                Total Marks: <span id="totalMarks">{{table.totalMarks}}</span>
+                            </div>
+                            <div id="maxMarksBox" class="total-box alert alert-secondary mt-3" style="display: none;">
+                                Max Marks: <span id="maxMarks">{{table.maxMarks}}</span>
+                            </div>
+                            <div id="percentageBox" class="total-box alert alert-success mt-3" style="display: none;">
+                                Percentage: <span id="percentage">{{table.percentage}}%</span>
+                            </div>
+                        </td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
 
-                <div class="input-box">
-                    {{#if (eq this.type "text")}}
-                    <input type="text" name="data[{{@../index}}][columns][{{@index}}][value]" value="{{this.value}}">
-                    {{else if (eq this.type "radio")}}
-                    <input type="radio" name="data[{{@../index}}][columns][{{@index}}][value]" value="Yes" {{#if (eq this.value "Yes")}}checked{{/if}}> Yes
-                    <input type="radio" name="data[{{@../index}}][columns][{{@index}}][value]" value="No" {{#if (eq this.value "No")}}checked{{/if}}> No
-                    {{else if (eq this.type "marks")}}
-                    <input type="number" name="data[{{@../index}}][columns][{{@index}}][value]" value="{{this.value}}" oninput="calculateTotal()">
-                    {{else if (eq this.type "maxMarks")}}
-                    <input type="number" name="data[{{@../index}}][columns][{{@index}}][value]" value="{{this.value}}" oninput="calculateTotal()">
-                    {{/if}}
-                </div>
-            </td>
-            {{/each}}
-        </tr>
-        {{/each}}
-        </tbody>
+        <button type="submit" class="btn btn-primary w-100 mt-3">Save Changes</button>
+    </form>
 
-        <tfoot>
-        <tr>
-            <td colspan="100%">
-                <div id="totalMarksBox" class="total-box" style="display: none;">
-                    Total Marks: <span id="totalMarks">{{table.totalMarks}}</span>
-                </div>
-                <div id="maxMarksBox" class="total-box" style="display: none;">
-                    Max Marks: <span id="maxMarks">{{table.maxMarks}}</span>
-                </div>
-                <div id="maxMarksBox" class="total-box" style="display: none;">
-                    Percentage: <span id="maxMarks">{{table.percentage}}%</span>
-                </div>
-            </td>
-        </tr>
-        </tfoot>
-    </table>
 
-    <button type="submit">Save Changes</button>
-</form>
+    <script>
+        function updateInput(select) {
+            let parent = select.closest('td');
+            let inputBox = parent.querySelector('.input-box');
+            let selectedType = select.value;
+            let inputName = select.name.replace('[type]', '[value]');
+            inputBox.innerHTML = '';
 
-<script>
-    function updateInput(select) {
-        let parent = select.closest('td');
-        let inputBox = parent.querySelector('.input-box');
-        let selectedType = select.value;
-        let inputName = select.name.replace('[type]', '[value]');
-        inputBox.innerHTML = '';
-
-        if (selectedType === 'text') {
-            inputBox.innerHTML = `<input type="text" name="${inputName}" placeholder="Enter Text">`;
-        } else if (selectedType === 'radio') {
-            inputBox.innerHTML = `
+            if (selectedType === 'text') {
+                inputBox.innerHTML = `<input type="text" name="${inputName}" placeholder="Enter Text">`;
+            } else if (selectedType === 'radio') {
+                inputBox.innerHTML = `
                 <input type="radio" name="${inputName}" value="Yes"> Yes
                 <input type="radio" name="${inputName}" value="No"> No
             `;
-        } else if (selectedType === 'marks') {
-            inputBox.innerHTML = `<input type="number" name="${inputName}" placeholder="Marks" oninput="calculateTotal()">`;
-        } else if (selectedType === 'maxMarks') {
-            inputBox.innerHTML = `<input type="number" name="${inputName}" placeholder="Max Marks" oninput="calculateTotal()">`;
+            } else if (selectedType === 'marks') {
+                inputBox.innerHTML = `<input type="number" name="${inputName}" placeholder="Marks" oninput="calculateTotal()">`;
+            } else if (selectedType === 'maxMarks') {
+                inputBox.innerHTML = `<input type="number" name="${inputName}" placeholder="Max Marks" oninput="calculateTotal()">`;
+            }
+            calculateTotal();
         }
-        calculateTotal();
-    }
 
-    function calculateTotal() {
-        let marksInputs = document.querySelectorAll('input[type="number"][placeholder="Marks"]');
-        let maxMarksInputs = document.querySelectorAll('input[type="number"][placeholder="Max Marks"]');
-        let total = 0;
-        let maxTotal = 0;
+        function calculateTotal() {
+            let marksInputs = document.querySelectorAll('input[type="number"][placeholder="Marks"]');
+            let maxMarksInputs = document.querySelectorAll('input[type="number"][placeholder="Max Marks"]');
+            let total = 0;
+            let maxTotal = 0;
 
-        marksInputs.forEach(input => {
-            total += Number(input.value) || 0;
-        });
+            marksInputs.forEach(input => {
+                let value = Number(input.value);
+                if (value < 0) {
+                    input.value = '';
+                    alert("Marks cannot be negative!");
+                    return;
+                }
+                total += value || 0;
+            });
 
-        maxMarksInputs.forEach(input => {
-            maxTotal += Number(input.value) || 0;
-        });
+            maxMarksInputs.forEach(input => {
+                maxTotal += Number(input.value) || 0;
+            });
 
-        document.getElementById('totalMarks').innerText = total;
-        document.getElementById('maxMarks').innerText = maxTotal;
+            document.getElementById('totalMarks').innerText = total;
+            document.getElementById('maxMarks').innerText = maxTotal;
 
-        document.getElementById('totalMarksBox').style.display = marksInputs.length > 0 ? 'block' : 'none';
-        document.getElementById('maxMarksBox').style.display = maxMarksInputs.length > 0 ? 'block' : 'none';
-    }
+            let percentage = (total / maxTotal) * 100 || 0;
+            document.getElementById('percentage').innerText = percentage.toFixed(2) + "%";
 
-    window.onload = calculateTotal;
-</script>
+            document.getElementById('totalMarksBox').style.display = marksInputs.length > 0 ? 'block' : 'none';
+            document.getElementById('maxMarksBox').style.display = maxMarksInputs.length > 0 ? 'block' : 'none';
+            document.getElementById('percentageBox').style.display = maxTotal > 0 ? 'block' : 'none';
+        }
+
+
+        window.onload = calculateTotal;
+    </script>
 
 </body>
 
