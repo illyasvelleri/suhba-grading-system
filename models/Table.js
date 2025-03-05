@@ -19,7 +19,7 @@ const tableSchema = new mongoose.Schema(
                 },
                 type: {
                     type: String,
-                    enum: ["text", "radio", "marks", "max-marks"], // Column Type
+                    enum: ["text", "radio", "mark", "max-mark"], // Column Type
                     required: true,
                 },
                 isEditable: {
@@ -41,23 +41,23 @@ const tableSchema = new mongoose.Schema(
                         value: String, // Editable Value Here
                         type: {
                             type: String,
-                            enum: ["text", "radio", "marks", "max-marks"], // Type Store in Data Also
+                            enum: ["text", "radio", "mark", "max-mark"], // Type Store in Data Also
                         },
                     },
                 ],
             },
         ],
         totalMarks: {
-            type: Number,
-            default: 0, // Automatically Calculate Total Marks
+            type: [Number],
+            default: [], // Automatically Calculate Total Marks
         },
         maxMarks: {
-            type: Number,
-            default: 0, // Automatically Calculate Max Marks
+            type: [Number],
+            default: [], // Automatically Calculate Max Marks
         },
         percentage: {
-            type: Number,
-            default: 0, // Automatically Calculate Percentage
+            type: [Number],
+            default: [], // Automatically Calculate Percentage
         }
     },
     { timestamps: true }
