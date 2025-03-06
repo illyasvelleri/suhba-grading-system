@@ -28,10 +28,12 @@
         select {
             width: 100%;
             padding: 5px;
+            border-radius: 10px;
         }
 
         input[type="radio"] {
             margin: 0 5px;
+
         }
 
         .total-box {
@@ -44,38 +46,44 @@
 </head>
 
 <body>
-    <h1 class="text-center text-secondary display-6 mb-4">Edit Table: {{table.tableName}}</h1>
-    <form action="/admin/table/update/{{table._id}}" method="POST" class="container mt-4">
+    <h1 class="text-center text-dark display-6 mb-4 pt-5 fw-bold">Edit Table: {{table.tableName}}</h1>
+    <form action="/admin/table/update/{{table._id}}" method="POST" class="container mt-4 pb-5">
+        <!-- Table Description Start -->
+        <div class="form-group mb-4 bg-white w-100 shadow-lg py-4 px-3 border-0 rounded-4">
+            <label class="fw-bold text-secondary mb-2">Table Description:</label>
+            <textarea name="tableDescription" class="form-control shadow-none" rows="3"
+                placeholder="Enter Table Description">{{table.tableDescription}}</textarea>
+        </div>
+        <!-- Table Description End -->
+
         <div class="table-responsive">
-            <table class="table table-bordered table-striped">
-                <thead class="table-warning">
+            <table class="table table-borderless table-hover">
+                <thead class="bg-light">
                     <tr>
-                        <th>Row Number</th>
+                        <th class="fw-bold">Row Number</th>
                         {{#each table.columns}}
-                        <th>
-                            <input type="text" class="form-control" name="columns[{{@index}}][name]"
+                        <th class="fw-bold">
+                            <input type="text" class="form-control form-control-sm" name="columns[{{@index}}][name]"
                                 value="{{this.name}}" required>
-                            <label class="form-check-label mt-2">
+                            <label class="form-check-label mt-2 d-flex align-items-center">
                                 <input type="hidden" name="columns[{{@index}}][isEditable]" value="false">
-                                <input type="checkbox" class="form-check-input" name="columns[{{@index}}][isEditable]"
-                                    value="true" {{#if this.isEditable}}checked{{/if}}>
+                                <input type="checkbox" class="form-check-input me-2"
+                                    name="columns[{{@index}}][isEditable]" value="true" {{#if
+                                    this.isEditable}}checked{{/if}}>
                                 Editable
                             </label>
                         </th>
                         {{/each}}
                     </tr>
                 </thead>
-                <div>
-
-                </div>
                 <tbody>
                     {{#each table.data}}
-                    <tr>
-                        <td>{{this.rowNumber}}</td>
+                    <tr class="align-middle">
+                        <td class="fw-bold">{{this.rowNumber}}</td>
                         {{#each this.columns}}
                         <td>
-                            <select name="data[{{@../index}}][columns][{{@index}}][type]" class="form-select"
-                                onchange="updateInput(this)">
+                            <select name="data[{{@../index}}][columns][{{@index}}][type]"
+                                class="form-select form-select-sm" onchange="updateInput(this)">
                                 <option value="text" {{#if (eq this.type "text" )}}selected{{/if}}>Text</option>
                                 <option value="radio" {{#if (eq this.type "radio" )}}selected{{/if}}>Radio</option>
                                 <option value="mark" {{#if (eq this.type "mark" )}}selected{{/if}}>Mark</option>
@@ -85,27 +93,27 @@
 
                             <div class="input-box mt-2">
                                 {{#if (eq this.type "text")}}
-                                <input type="text" class="form-control"
+                                <input type="text" class="form-control form-control-sm"
                                     name="data[{{@../index}}][columns][{{@index}}][value]" value="{{this.value}}">
                                 {{else if (eq this.type "radio")}}
-                                <div>
-                                    <label class="form-check-label">
+                                <div class="d-flex">
+                                    <label class="form-check-label me-3">
                                         <input type="radio" class="form-check-input"
                                             name="data[{{@../index}}][columns][{{@index}}][value]" value="Yes" {{#if (eq
                                             this.value "Yes" )}}checked{{/if}}> Yes
                                     </label>
-                                    <label class="form-check-label ms-3">
+                                    <label class="form-check-label">
                                         <input type="radio" class="form-check-input"
                                             name="data[{{@../index}}][columns][{{@index}}][value]" value="No" {{#if (eq
                                             this.value "No" )}}checked{{/if}}> No
                                     </label>
                                 </div>
                                 {{else if (eq this.type "mark")}}
-                                <input type="number" class="form-control"
+                                <input type="number" class="form-control form-control-sm"
                                     name="data[{{@../index}}][columns][{{@index}}][value]" value="{{this.value}}"
                                     oninput="calculateTotal()">
                                 {{else if (eq this.type "max-mark")}}
-                                <input type="number" class="form-control"
+                                <input type="number" class="form-control form-control-sm"
                                     name="data[{{@../index}}][columns][{{@index}}][value]" value="{{this.value}}"
                                     oninput="calculateTotal()">
                                 {{/if}}
@@ -115,22 +123,18 @@
                     </tr>
                     {{/each}}
                 </tbody>
-
                 <tfoot>
                     <tr>
                         <td colspan="100%">
-                            <div class="total-box alert alert-primary mt-3">
+                            <div class="total-box alert alert-primary mt-3 mb-0">
                                 Total Marks: {{table.totalMarks}}
                             </div>
-
-                            <div class="total-box alert alert-secondary mt-3">
+                            <div class="total-box alert alert-secondary mt-3 mb-0">
                                 Max Marks: {{table.maxMarks}}
                             </div>
-
-                            <div class="total-box alert alert-success mt-3">
+                            <div class="total-box alert alert-success mt-3 mb-0">
                                 Percentage: {{table.percentage}}%
                             </div>
-
                         </td>
                     </tr>
                 </tfoot>
@@ -162,47 +166,6 @@
                 inputBox.innerHTML = `<input type="number" name="${inputName}" placeholder="Max Mark" oninput="calculateTotal()">`;
             }
         }
-
-        function calculateTotal(fetch = false) {
-            let markInputs = document.querySelectorAll('input[type="number"][placeholder="Mark"]');
-            let maxMarkInputs = document.querySelectorAll('input[type="number"][placeholder="Max Mark"]');
-            let total = 0;
-            let maxTotal = 0;
-
-            markInputs.forEach(input => {
-                let value = Number(input.value);
-                if (value < 0) {
-                    input.value = '';
-                    alert("Mark cannot be negative!");
-                    return;
-                }
-                total += value || 0;
-            });
-
-            maxMarkInputs.forEach(input => {
-                maxTotal += Number(input.value) || 0;
-            });
-
-            if (fetch) {
-                total = Number("{{table.totalMarks}}") || 0; // ✅ Fetch Total Marks from DB
-                maxTotal = Number("{{table.maxMarks}}") || 0; // ✅ Fetch Max Marks from DB
-            }
-
-            document.getElementById('totalMarks').innerText = total;
-            document.getElementById('max-marks').innerText = maxTotal;
-
-            let percentage = (total / maxTotal) * 100 || 0;
-            document.getElementById('percentage').innerText = percentage.toFixed(2) + "%";
-
-            document.getElementById('totalMarksBox').style.display = markInputs.length > 0 ? 'block' : 'none';
-            document.getElementById('max-marks-box').style.display = maxMarkInputs.length > 0 ? 'block' : 'none';
-            document.getElementById('percentageBox').style.display = maxTotal > 0 ? 'block' : 'none';
-        }
-
-
-        window.onload = function () {
-            calculateTotal(true); // ✅ Call function with 'true' to fetch from DB
-        };
     </script>
 
 </body>
