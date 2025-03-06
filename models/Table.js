@@ -58,8 +58,13 @@ const tableSchema = new mongoose.Schema(
         percentage: {
             type: [Number],
             default: [], // Automatically Calculate Percentage
-        }
+        },
+        tableDescription: {
+            type: String,
+            default: ""
+        },
     },
+
     { timestamps: true }
 );
 
