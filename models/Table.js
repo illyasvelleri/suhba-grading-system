@@ -43,6 +43,9 @@ const tableSchema = new mongoose.Schema(
                             type: String,
                             enum: ["text", "radio", "mark", "max-mark"], // Type Store in Data Also
                         },
+                        isEditable: {
+                            type: Boolean
+                        },
                     },
                 ],
             },

@@ -73,6 +73,9 @@
                                 Editable
                             </label>
                         </th>
+                          <!-- Debugging: Print values -->
+                        {{log "col.type" this.type}}
+                        {{log "col.isEditable" this.isEditable}}
                         {{/each}}
                     </tr>
                 </thead>

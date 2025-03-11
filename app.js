@@ -10,11 +10,11 @@ const dotenv = require("dotenv");
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 const connectDB = require('./config/db');
+const autoHashPassword = require("./utils/hashEnv");
 
 dotenv.config();
+autoHashPassword(); // Auto Hash Admin Password on Server Start 🔥
 connectDB();
-
-
 
 var adminRouter = require('./routes/adminRoutes');
 var userRouter = require('./routes/userRoutes');
@@ -44,15 +44,28 @@ const hbs = exphbs.create({
         return options.inverse(this); // Render the else block if both conditions are false
       }
     },
-    // Other helpers (if any)
+    // Helper to check if two values are equal
     eq: function (a, b) {
       return a === b;
     },
+    // Lookup helper
     lookup: function (obj, key) {
       return obj ? obj[key] : "";
     },
+    // Helper to check if a column is editable
+    isEditable: function (type) {
+      return type !== "text" && type !== "radio"; // Allow editing for "mark" and "max-mark"
+    },
+    // Helper to check if a specific column is editable for a user
+    lookupIsEditable: function (columns, index) {
+      if (columns && columns[index]) {
+        return columns[index].isEditable;
+      }
+      return false;
+    }
   },
 });
+
 
 app.engine("hbs", hbs.engine);
 app.set("view engine", "hbs");
@@ -62,11 +75,24 @@ app.set("views", path.join(__dirname, "views"));
 app.use(logger('dev'));
 app.use(express.json());
 
-app.use(session({
-  secret: "velleri_secret_key", // You Can Change This
-  resave: false,
-  saveUninitialized: true
-}));
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET || "grading-system-secret",
+    resave: false,
+    saveUninitialized: false,
+    store: MongoStore.create({
+      mongoUrl: process.env.MONGO_URI, // Your MongoDB URL
+      ttl: 60 * 60, // 1 Hour Session Expiration
+    }),
+    cookie: {
+      secure: false, // Use true in HTTPS
+      httpOnly: true, // Prevent JS Access
+      maxAge: 60 * 60 * 1000, // 1 Hour Expiration
+    },
+  })
+);
+
+
 // Flash Middleware
 app.use(flash());
 

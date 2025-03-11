@@ -42,15 +42,17 @@
         <div class="row g-3 mt-4">
             {{#each sections}}
             <div class="col-md-4">
-                <button
-                    class="btn btn-white w-100 section-btn shadow-lg py-4 border-0 rounded-4 position-relative overflow-hidden"
-                    data-id="{{this._id}}">
-                    <div class="fw-bold fs-5">{{this.name}}</div>
-                    <div class="small">Number: {{this.number}}</div>
-                </button>
+                <form action="/admin/view-section/{{this._id}}" method="GET">
+                    <button type="submit"
+                        class="btn btn-white w-100 section-btn shadow-lg py-4 border-0 rounded-4 position-relative overflow-hidden">
+                        <div class="fw-bold fs-5">{{this.name}}</div>
+                        <div class="small">Number: {{this.number}}</div>
+                    </button>
+                </form>
             </div>
             {{/each}}
         </div>
+
     </div>
 </div>
 
