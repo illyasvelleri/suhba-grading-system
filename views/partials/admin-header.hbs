@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Responsive Navbar</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    <style>
+        /* Navbar Custom Styles */
+        .navbar {
+            background: #0d6efd;
+            /* Primary color */
+            padding: 12px 16px;
+            transition: all 0.3s ease-in-out;
+        }
+
+        .navbar-brand {
+            font-size: 22px;
+            font-weight: bold;
+            color: #fff;
+            transition: 0.3s;
+        }
+
+        .navbar-brand:hover {
+            color: #f5f5f5;
+        }
+
+        .navbar-nav .nav-link {
+            color: #fff;
+            font-size: 16px;
+            font-weight: 500;
+            margin: 0 10px;
+            transition: 0.3s;
+        }
+
+        .navbar-nav .nav-link:hover,
+        .navbar-nav .nav-link.active {
+            color: #ccc;
+            text-decoration: underline;
+        }
+
+        /* Toggle Button */
+        .navbar-toggler {
+            border: none;
+            outline: none;
+            box-shadow: none;
+        }
+
+        .navbar-toggler:focus {
+            outline: none;
+        }
+
+        /* Mobile Navbar */
+        @media (max-width: 992px) {
+            .navbar-nav {
+                background: #0d6efd;
+                padding: 10px;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Navbar Start -->
+    <nav class="navbar navbar-expand-lg">
+        <div class="container">
+            <a class="navbar-brand" href="#">MyBrand</a>
+            <button class="navbar-toggler text-white" type="button" data-bs-toggle="collapse"
+                data-bs-target="#navbarNav">
+                <i class="fas fa-bars"></i>
+            </button>
+            <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/admin/dashboard">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/admin/logout">LogOut</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Contact</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    <!-- Navbar End -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>
