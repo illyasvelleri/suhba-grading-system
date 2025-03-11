@@ -1,5 +1,45 @@
 const Section = require("../models/Section");
 const Table = require("../models/Table");
+const bcrypt = require("bcryptjs");
+
+// Admin Login
+const adminUsername = process.env.ADMIN_USERNAME;
+const plainPassword = process.env.ADMIN_PASSWORD;
+
+// Admin Login
+exports.login = async (req, res) => {
+  const { username, password } = req.body;
+
+  if (username === adminUsername) {
+    const isMatch = await bcrypt.compare(password, plainPassword);
+
+    if (isMatch) {
+      req.session.isAdmin = true;
+      req.session.lastAccess = Date.now();
+      req.flash("success", "Welcome Admin 😊");
+      res.redirect("/admin/dashboard");
+    } else {
+      console.log("❌ Wrong Password:", password);
+      req.flash("error", "Invalid Username or Password ❌");
+      res.redirect("/admin/login");
+    }
+  } else {
+    console.log("❌ Wrong Username:", username);
+    req.flash("error", "Invalid Username or Password ❌");
+    res.redirect("/admin/login");
+  }
+};
+
+
+// Admin Logout
+exports.logout = (req, res) => {
+  req.session.destroy(() => {
+    res.redirect("/admin/login");
+  });
+};
+
+
+////////////
 
 
 // Display Dashboard
@@ -77,7 +117,8 @@ exports.createTable = async (req, res) => {
         columns: columns.map((col) => ({
           columnName: col.name,
           value: "", // Initialize with empty value
-          type: col.type // Add the column type to each column
+          type: col.type, // Add the column type to each column
+          isEditable: col.isEditable
         }))
       };
       table.data.push(row); // Add the row to the data array
@@ -192,7 +233,7 @@ exports.updateTable = async (req, res) => {
     table.columns = columns.map((col, index) => ({
       name: col.name,
       type: col.type || "text",
-      isEditable: col.isEditable === "on" ? true : false,
+      isEditable: table.columns[index]?.isEditable ?? true,
     }));
 
     // ✅ Check Data Undefined Problem
@@ -203,6 +244,7 @@ exports.updateTable = async (req, res) => {
           columnName: table.columns[colIndex]?.name,
           value: col.value || "",
           type: col.type || "text",
+          isEditable: table.columns[colIndex]?.isEditable ?? true, 
         })),
       }));
     }
