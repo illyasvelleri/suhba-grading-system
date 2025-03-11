@@ -1,48 +1,32 @@
 var express = require('express');
 var router = express.Router();
 const adminController = require("../controllers/adminController");
+const { adminLoginLimiter } = require("../utils/rateLimit");
+const { isAdmin } = require("../middlewares/auth");
 
 // Admin Login Page Render
-router.get("/login", (req, res) => {
+router.get('/', (req, res) => {
   res.render("admin/login"); // Create admin/login.hbs Page
 });
 
-// Admin Login System with Username & Password
-router.post("/login", (req, res) => {
-  const { username, password } = req.body;
+/// Admin Login System with Username & Password
+router.post("/login", adminLoginLimiter, adminController.login);
 
-  if (username === "admin" && password === "admin123") {
-    req.session.isAdmin = true; // Set Admin Session
-    res.redirect("/admin/dashboard"); // Redirect to Admin Dashboard
-  } else {
-    res.send("Invalid Username or Password ❌");
-  }
-});
+router.get("/dashboard", isAdmin, adminController.dashboard);
 
+router.get("/logout", isAdmin, adminController.logout);
 
+router.post("/section", isAdmin, adminController.createSection);
 
-/* GET users listing. */
-router.get('/', function (req, res, next) {
-  res.send("suhba admin login");
-});
+router.get("/section/delete/:id", isAdmin, adminController.deleteSection);
 
-router.get("/dashboard", adminController.dashboard);
+router.get("/view-section/:id", isAdmin, adminController.viewSection);
 
-router.post("/section", adminController.createSection);
+router.post("/table/create", isAdmin, adminController.createTable);
 
-router.get("/section/delete/:id", adminController.deleteSection);
+router.delete("/table/delete/:id", isAdmin, adminController.deleteTable);
 
-router.get("/section/:id", adminController.viewSection);
+router.get("/table/edit/:id", isAdmin, adminController.editTablePage);
 
-router.post("/table/create", adminController.createTable);
-
-router.get("/view-section/:id", adminController.viewSection);
-
-router.delete("/table/delete/:id", adminController.deleteTable);
-
-
-router.get("/table/edit/:id", adminController.editTablePage);
-
-router.post("/table/update/:id", adminController.updateTable);
-
+router.post("/table/update/:id", isAdmin, adminController.updateTable);
 module.exports = router;
