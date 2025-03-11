@@ -1,0 +1,17 @@
+<h1>Welcome, {{user.userName}}!</h1>
+<p>This is your dashboard.</p>
+<div class="row g-3 mt-4">
+    {{#each sections}}
+    <div class="col-md-4">
+        <form action="/view-section/{{this._id}}" method="GET">
+            <button type="submit"
+                class="btn btn-white w-100 section-btn shadow-lg py-4 border-0 rounded-4 position-relative overflow-hidden">
+                <div class="fw-bold fs-5">{{this.name}}</div>
+                <div class="small">Number: {{this.number}}</div>
+            </button>
+        </form>
+    </div>
+    {{/each}}
+</div>
+
+<a href="/user/logout">Logout</a>
