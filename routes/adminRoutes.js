@@ -2,7 +2,7 @@ var express = require('express');
 var router = express.Router();
 const adminController = require("../controllers/adminController");
 const { adminLoginLimiter } = require("../utils/rateLimit");
-const { isAdmin } = require("../middlewares/auth");
+const { isAdmin, isUser } = require("../middlewares/auth");
 
 // Admin Login Page Render
 router.get('/', (req, res) => {
@@ -29,4 +29,5 @@ router.delete("/table/delete/:id", isAdmin, adminController.deleteTable);
 router.get("/table/edit/:id", isAdmin, adminController.editTablePage);
 
 router.post("/table/update/:id", isAdmin, adminController.updateTable);
+
 module.exports = router;

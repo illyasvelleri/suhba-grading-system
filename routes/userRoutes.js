@@ -33,12 +33,18 @@ router.get('/dashboard', isUser, userController.dashboard);
 router.get("/view-section/:id", isUser, userController.viewSection);
 
 // Edit Table Page (Load existing table if user has one)
-router.get("/table/edit/:id", isUser, userController.editTablePage);
+// router.post("/table/save/:id", isUser, userController.saveTable);
 
 // Update Table (Save only allowed columns)
-router.post("/table/update/:id", isUser, userController.updateTable);
+router.post("/table/save/:id", isUser, userController.saveTable);
+
+// Show user profile page
+router.get("/profile", isUser, userController.profile);
+
+// Update user profile
+router.post("/profile", isUser, userController.updateProfile);
 
 // User Logout
-// router.get('/logout', isUser, userController.logout);
+router.get('/logout', isUser, userController.logout);
 
 module.exports = router;

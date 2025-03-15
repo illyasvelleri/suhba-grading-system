@@ -35,6 +35,7 @@ const hbs = exphbs.create({
   extname: "hbs",
   defaultLayout: "layout",
   layoutsDir: path.join(__dirname, "views", "layouts"),
+  partialsDir: path.join(__dirname, 'views', 'partials'),
   helpers: {
     // Custom 'or' helper
     or: function (a, b, options) {
@@ -82,6 +83,7 @@ app.use(
     saveUninitialized: false,
     store: MongoStore.create({
       mongoUrl: process.env.MONGO_URI, // Your MongoDB URL
+      collectionName: "sessions",
       ttl: 60 * 60, // 1 Hour Session Expiration
     }),
     cookie: {

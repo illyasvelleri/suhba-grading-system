@@ -14,9 +14,12 @@
 </head>
 
 <body>
-
+    {{#if headerType}}
+    {{> (lookup . "headerType")}}
+    {{/if}} <!-- Dynamically include the correct header -->
     {{{body}}} <!-- This Will Show Your Page Content -->
-    {{#if success}}
+
+    {{!-- {{#if success}}
     <div style="background: green; color: #fff; padding: 10px; text-align: center;">
         {{success}}
     </div>
@@ -26,7 +29,7 @@
     <div style="background: red; color: #fff; padding: 10px; text-align: center;">
         {{error}}
     </div>
-    {{/if}}
+    {{/if}} --}}
 
     <!--scripts-->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"

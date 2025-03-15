@@ -21,37 +21,40 @@ exports.login = async (req, res) => {
     } else {
       console.log("❌ Wrong Password:", password);
       req.flash("error", "Invalid Username or Password ❌");
-      res.redirect("/admin/login");
+      res.redirect("/admin");
     }
   } else {
     console.log("❌ Wrong Username:", username);
     req.flash("error", "Invalid Username or Password ❌");
-    res.redirect("/admin/login");
+    res.redirect("/admin");
   }
 };
 
 
 // Admin Logout
 exports.logout = (req, res) => {
-  req.session.destroy(() => {
-    res.redirect("/admin/login");
+  req.session.destroy((err) => {
+    if (err) {
+      console.error("Error destroying session:", err);
+      return res.redirect("/admin/dashboard"); // If error, stay on dashboard
+    }
+    res.redirect("/admin"); // Redirect to login after successful logout
   });
 };
 
 
-////////////
 
 
 // Display Dashboard
 exports.dashboard = async (req, res) => {
   const sections = await Section.find().lean();
-  res.render("admin/dashboard", { sections });
+  res.render("admin/dashboard", { sections, layout: 'layout', headerType: 'admin-header' });
 };
 
 // Create Section
 exports.createSection = async (req, res) => {
-  const { name, number } = req.body;
-  await new Section({ name, number }).save();
+  const { number, name, sectionCategory } = req.body;
+  await new Section({ number, name, sectionCategory }).save();
   res.redirect("/admin/dashboard");
 };
 
@@ -70,7 +73,7 @@ exports.viewSection = async (req, res) => {
 
     console.log("Section Found:", section);
     const tables = await Table.find({ section: section._id }).populate("section"); // Fetch All Tables Related to Section
-    res.render("admin/view-section", { section: section.toObject(), tables: tables.map(table => table.toObject()) });
+    res.render("admin/view-section", { section: section.toObject(), tables: tables.map(table => table.toObject()), layout: 'layout', headerType: 'admin-header' });
   } catch (err) {
     console.log("Error:", err);
     res.status(500).send("Server Error");
@@ -150,7 +153,7 @@ exports.editTablePage = async (req, res) => {
       return res.status(404).send("Table Not Found");
     }
     const isAdmin = req.session.isAdmin; // Check Admin Status
-    res.render("admin/table", { table: table.toObject(), isAdmin: isAdmin }); // Pass Table Data
+    res.render("admin/table", { table: table.toObject(), isAdmin: isAdmin, layout: 'layout', headerType: 'admin-header' }); // Pass Table Data
   } catch (err) {
     console.log(err);
     res.status(500).send("Server Error");
@@ -244,7 +247,7 @@ exports.updateTable = async (req, res) => {
           columnName: table.columns[colIndex]?.name,
           value: col.value || "",
           type: col.type || "text",
-          isEditable: table.columns[colIndex]?.isEditable ?? true, 
+          isEditable: table.columns[colIndex]?.isEditable ?? true,
         })),
       }));
     }
