@@ -1,0 +1,17 @@
+<h1>Profile Settings</h1>
+<form action="/profile" method="POST">
+    <label>Username:</label>
+    <input type="text" name="username" value="{{user.username}}" required />
+
+    <label>Category:</label>
+    <select name="category">
+        <option value="below20" {{#if (eq user.category "below20" )}}selected{{/if}}>Below 20</option>
+        <option value="below50" {{#if (eq user.category "below50" )}}selected{{/if}}>Below 50</option>
+        <option value="above50" {{#if (eq user.category "above50" )}}selected{{/if}}>Above 50</option>
+    </select>
+
+    <label>Student Count:</label>
+    <input type="number" name="studentCount" value="{{user.studentCount}}" min="0" />
+
+    <button type="submit">Update Profile</button>
+</form>
