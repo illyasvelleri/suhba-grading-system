@@ -35,34 +35,26 @@ const hbs = exphbs.create({
   extname: "hbs",
   defaultLayout: "layout",
   layoutsDir: path.join(__dirname, "views", "layouts"),
-  partialsDir: path.join(__dirname, 'views', 'partials'),
+  partialsDir: path.join(__dirname, "views", "partials"),
+  runtimeOptions: {
+    allowProtoPropertiesByDefault: true,  // ✅ Allow accessing properties
+    allowProtoMethodsByDefault: true,    // ✅ Allow calling prototype methods
+  },
   helpers: {
-    // Custom 'or' helper
     or: function (a, b, options) {
-      if (a || b) {
-        return options.fn(this); // Render the block if either condition is true
-      } else {
-        return options.inverse(this); // Render the else block if both conditions are false
-      }
+      return (a || b) ? options.fn(this) : options.inverse(this);
     },
-    // Helper to check if two values are equal
     eq: function (a, b) {
       return a === b;
     },
-    // Lookup helper
     lookup: function (obj, key) {
       return obj ? obj[key] : "";
     },
-    // Helper to check if a column is editable
     isEditable: function (type) {
-      return type !== "text" && type !== "radio"; // Allow editing for "mark" and "max-mark"
+      return type !== "text" && type !== "radio";
     },
-    // Helper to check if a specific column is editable for a user
     lookupIsEditable: function (columns, index) {
-      if (columns && columns[index]) {
-        return columns[index].isEditable;
-      }
-      return false;
+      return columns?.[index]?.isEditable || false;
     }
   },
 });
@@ -107,6 +99,7 @@ app.use((req, res, next) => {
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+
 
 app.use('/', userRouter);
 app.use('/admin', adminRouter);
