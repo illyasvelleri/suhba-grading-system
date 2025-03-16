@@ -3,6 +3,8 @@ const User = require('../models/User');
 const Section = require('../models/Section');
 const UserTableData = require('../models/UserTableData');
 const Table = require('../models/Table');
+const mongoose = require("mongoose");
+const router = require('../routes/adminRoutes');
 
 exports.register = async (req, res) => {
     console.log("🔍 Request Body:", req.body); // Debugging log
@@ -43,10 +45,11 @@ exports.login = async (req, res) => {
 
         // Set session for user
         req.session.user = {
-            id: user._id,
+            id: user._id.toString(),
             username: user.username,
             lastAccess: Date.now(),
         };
+        await req.session.save();
         console.log("Session Data:", req.session);
 
         console.log("✅ User Logged In:", username);
@@ -83,20 +86,21 @@ exports.dashboard = async (req, res) => {
 
 exports.viewSection = async (req, res) => {
     console.log("Session Data:", req.session);
-    console.log("body:",req.params.id);
+    console.log("body:", req.params.id);
 
     try {
+
         const section = await Section.findById(req.params.id);
         if (!section) {
             req.flash("error", "Section Not Found");
             return res.redirect("/dashboard");
         }
 
-        const userId = req.session.user._id; // User ID from session
+        const userId = req.session.user.id; // User ID from session
         console.log("useriddddddddddddd:", userId);
         console.log("🔍 Checking for user-saved table...");
 
-        let userTableData = await UserTableData.findOne({ section: section._id, user: userId }).populate("user");
+        let userTableData = await UserTableData.findOne({ section: section._id, user: userId }).populate("user").lean();
 
         if (userTableData) {
             console.log("✅ User has a saved table. Displaying...:", userTableData);
@@ -124,7 +128,7 @@ exports.viewSection = async (req, res) => {
         }
 
         console.log("❌ No saved table found. Fetching admin-created tables...");
-        let tables = await Table.find({ section: section._id }).populate("section");
+        let tables = await Table.find({ section: section._id }).populate("section").lean();
 
         if (!tables.length) {
             console.log("⚠️ No tables available in this section.");
@@ -143,22 +147,30 @@ exports.viewSection = async (req, res) => {
 
             table.data.forEach(row => {
                 row.columns = row.columns.map((col, index) => ({
-                    ...col,
-                    type: table.columns[index]?.type || "text", // Ensure type matches column definition
-                    isEditable: table.columns[index]?.isEditable || false // Sync with main columns
+                    name: table.columns[index]?.name || `Column ${index + 1}`, // Column name
+                    value: col.value || "", // Actual cell value
+                    type: table.columns[index]?.type || "text",
+                    isEditable: table.columns[index]?.isEditable || false
                 }));
             });
         });
-
         console.log("✅ Tables processed successfully.");
-
-        res.render("user/table", {
-            section: section.toObject(),
+        if (tables.length) {
+            tables.forEach((table, index) => {
+                console.log(`✅ Table ${index + 1} Columns:`, table.columns.map(col => col.name));
+            });
+        }
+        console.log("User Data passing:", req.session.user);
+     
+        res.render("user/view-section", {
+            section,
             user: req.session.user,
-            tables: tables.map(table => table.toObject()),
+            tables,
             layout: "layout",
             headerType: "user-header",
+            
         });
+        
 
     } catch (err) {
         console.error("❌ Error in viewSection:", err);
@@ -166,32 +178,6 @@ exports.viewSection = async (req, res) => {
         res.redirect("/dashboard");
     }
 };
-
-
-// exports.editTablePage = async (req, res) => {
-//     try {
-//         const { id } = req.params; // Table ID
-//         const userId = req.session.user._id; // Get user ID from session
-
-//         const table = await Table.findById(id);
-//         if (!table) {
-//             req.flash("error", "Table not found");
-//             return res.redirect("/dashboard");
-//         }
-
-//         // Ensure the user has permission to edit
-//         if (!table.user.equals(userId)) {
-//             req.flash("error", "Unauthorized access");
-//             return res.redirect("/dashboard");
-//         }
-
-//         res.render("user/edit-table", { user: req.session.user, table });
-//     } catch (err) {
-//         console.error(err);
-//         req.flash("error", "Something went wrong");
-//         res.redirect("/dashboard");
-//     }
-// };
 
 
 exports.saveTable = async (req, res) => {
@@ -202,7 +188,7 @@ exports.saveTable = async (req, res) => {
     try {
         const { id } = req.params; // Corrected table ID access
         const { tableDescription, data, sectionId } = req.body;
-
+        console.log("User ID:", req.session.user._id); // ✅ Log the user ID
         if (!req.session.user) {
             req.flash("error", "Please login first ❌");
             return res.redirect("/login");
@@ -241,7 +227,7 @@ exports.saveTable = async (req, res) => {
         let userTableData = await UserTableData.findOne({ table: id });
         console.log("Saving Data:", JSON.stringify(req.body, null, 2));
 
-        
+
         if (!userTableData) {
             userTableData = new UserTableData({
                 user: req.session.user._id, // Ensure user is logged in
