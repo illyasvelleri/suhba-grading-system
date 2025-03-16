@@ -52,6 +52,10 @@
 <form action="/table/save/{{this._id}}" method="POST" class="container mt-4 pb-5">
     <input type="hidden" name="sectionId" value="{{section._id}}">
 
+    
+    <p>✅ Logged in as: {{user.username}}</p>
+    <p>✅ section name: {{section.name}}</p>
+
     <!-- Table Description Start -->
     <div class="form-group mb-4 bg-white w-100 shadow-lg py-4 px-3 border-0 rounded-4">
         <label class="fw-bold text-secondary mb-2">Table Description:</label>
@@ -79,11 +83,10 @@
                 </tr>
             </thead>
             <tbody>
-                
+
 
 
                 {{#each this.data}}
-                
                 <tr class="align-middle">
                     <td class="fw-bold">{{this.rowNumber}}</td>
                     {{#each this.columns}}
@@ -92,8 +95,8 @@
                             {{#if (eq this.type "text")}}
 
                             <input type="hidden" name="data[{{@../index}}][columns][{{@index}}][name]"
-                                value="{{../this.name}}">
-                                {{log this.name}}
+                                value="{{this.name}}">
+
 
                             <input type="text" class="form-control form-control-sm"
                                 name="data[{{@../index}}][columns][{{@index}}][value]" value="{{this.value}}" {{#unless
@@ -123,14 +126,14 @@
                             <input type="hidden" name="data[{{@../index}}][columns][{{@index}}][name]"
                                 value="{{../this.name}}">
                             <input type="number" class="form-control form-control-sm"
-                                name="data[{{@../index}}][columns][{{@index}}][value]]" value="{{this.value}}"
+                                name="data[{{@../index}}][columns][{{@index}}][value]" value="{{this.value}}"
                                 oninput="calculateTotal()" {{#unless this.isEditable}}readonly{{/unless}}>
 
                             {{else if (eq this.type "max-mark")}}
                             <input type="hidden" name="data[{{@../index}}][columns][{{@index}}][name]"
                                 value="{{../this.name}}">
                             <input type="number" class="form-control form-control-sm"
-                                name="data[{{@../index}}][columns][{{@index}}][value]]" value="{{this.value}}"
+                                name="data[{{@../index}}][columns][{{@index}}][value]" value="{{this.value}}"
                                 oninput="calculateTotal()" {{#unless this.isEditable}}readonly{{/unless}}>
 
                             {{/if}}
