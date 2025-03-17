@@ -48,19 +48,19 @@
 
 {{#if tables.length}}
 {{#each tables}}
-
 <form action="/table/save/{{this._id}}" method="POST" class="container mt-4 pb-5">
+    <p>Table : {{this._id}}</p>
     <input type="hidden" name="sectionId" value="{{section._id}}">
     <input type="hidden" name="userId" value="{{../user._id}}">
-    
+
     <p>✅ Logged in as: {{../user.username}}</p>
     <p>✅ section name: {{../section.name}}</p>
 
     <!-- Table Description Start -->
     <div class=" form-group mb-4 bg-white w-100 shadow-lg py-4 px-3 border-0 rounded-4">
-    <label class="fw-bold text-secondary mb-2">Table Description:</label>
-    <textarea name="tableDescription" class="form-control shadow-none" rows="3"
-        placeholder="Enter Table Description">{{table.tableDescription}}</textarea>
+        <label class="fw-bold text-secondary mb-2">Table Description:</label>
+        <textarea name="tableDescription" class="form-control shadow-none" rows="3"
+            placeholder="Enter Table Description">{{table.tableDescription}}</textarea>
     </div>
     <!-- Table Description End -->
 
