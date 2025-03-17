@@ -161,16 +161,18 @@ exports.viewSection = async (req, res) => {
             });
         }
         console.log("User Data passing:", req.session.user);
-     
+        console.log("Tables Data:", tables);
+        console.log("Table Paths:", tables.map(table => `/table/save/${table._id}`));
+
         res.render("user/view-section", {
             section,
             user: req.session.user,
             tables,
             layout: "layout",
             headerType: "user-header",
-            
+
         });
-        
+
 
     } catch (err) {
         console.error("❌ Error in viewSection:", err);
@@ -188,7 +190,7 @@ exports.saveTable = async (req, res) => {
     try {
         const { id } = req.params; // Corrected table ID access
         const { tableDescription, data, sectionId } = req.body;
-        console.log("User ID:", req.session.user._id); // ✅ Log the user ID
+        console.log("User ID:", req.session.user.id); // ✅ Log the user ID
         if (!req.session.user) {
             req.flash("error", "Please login first ❌");
             return res.redirect("/login");
@@ -230,7 +232,7 @@ exports.saveTable = async (req, res) => {
 
         if (!userTableData) {
             userTableData = new UserTableData({
-                user: req.session.user._id, // Ensure user is logged in
+                user: req.session.user.id, // Ensure user is logged in
                 section: sectionId,
                 table: id,
                 tableDescription,
