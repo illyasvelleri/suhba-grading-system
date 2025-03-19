@@ -225,7 +225,7 @@ exports.viewSection = async (req, res) => {
                     name: userTableData.columns[index]?.name || `Column ${index + 1}`,
                     value: col.value || "",
                     type: userTableData.columns[index]?.type || "text",
-                    isEditable: userTableData.columns[index]?.isEditable || false
+                    isEditable: col.isEditable !== undefined ? col.isEditable : userTableData.columns[index]?.isEditable || false
                 }));
             });
 
@@ -246,7 +246,7 @@ exports.viewSection = async (req, res) => {
                     name: table.columns[index]?.name || `Column ${index + 1}`,
                     value: col.value || "",
                     type: table.columns[index]?.type || "text",
-                    isEditable: table.columns[index]?.isEditable || false
+                    isEditable: col.isEditable !== undefined ? col.isEditable : userTableData.columns[index]?.isEditable || false
                 }));
             });
 
