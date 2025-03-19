@@ -31,7 +31,6 @@ router.get('/dashboard', isUser, userController.dashboard);
 
 // View Section (Check if user has a table in this section)
 router.get("/view-section/:id", isUser, userController.viewSection);
-
 // Edit Table Page (Load existing table if user has one)
 // router.post("/table/save/:id", isUser, userController.saveTable);
 
