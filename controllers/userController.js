@@ -84,112 +84,10 @@ exports.dashboard = async (req, res) => {
 
 
 
-// exports.viewSection = async (req, res) => {
-//     console.log("Session Data:", req.session);
-//     console.log("body:", req.params.id);
-
-//     try {
-
-//         const section = await Section.findById(req.params.id);
-//         if (!section) {
-//             req.flash("error", "Section Not Found");
-//             return res.redirect("/dashboard");
-//         }
-
-//         const userId = req.session.user.id; // User ID from session
-//         console.log("useriddddddddddddd:", userId);
-//         console.log("🔍 Checking for user-saved table...");
-
-//         let userTableData = await UserTableData.findOne({ section: section._id, user: userId }).populate("user").lean();
-
-//         if (userTableData) {
-//             console.log("✅ User has a saved table. Merging with admin updates...:", userTableData);
-
-//             // Ensure columns have `isEditable`
-//             userTableData.columns = userTableData.columns.map(col => ({
-//                 ...col,
-//                 isEditable: col.isEditable !== undefined ? col.isEditable : false
-//             }));
-
-//             // Process each row's columns
-//             userTableData.data.forEach(row => {
-//                 row.columns = row.columns.map((col, index) => ({
-//                     name: userTableData.columns[index]?.name || `Column ${index + 1}`,
-//                     value: col.value || "",
-//                     type: userTableData.columns[index]?.type || "text",
-//                     isEditable: userTableData.columns[index]?.isEditable || false
-//                 }));
-//             });
-
-//             console.log("✅ User Table processed successfully.");
-
-//             return res.render("user/view-section", {
-//                 section,
-//                 user: req.session.user,
-//                 tables: [userTableData],
-//                 user: req.session.user,
-//                 layout: "layout",
-//                 headerType: "user-header",
-//             });
-//         }
-
-//         console.log("❌ No saved table found. Fetching admin-created tables...");
-//         let tables = await Table.find({ section: section._id }).populate("section").lean();
-
-//         if (!tables.length) {
-//             console.log("⚠️ No tables available in this section.");
-//             req.flash("error", "No tables available for this section.");
-//             return res.redirect("/dashboard");
-//         }
-
-//         console.log("✅ Admin tables found. Processing...");
-
-//         // ✅ Ensure each column has `isEditable` and sync it with `data.columns`
-//         tables.forEach(table => {
-//             table.columns = table.columns.map(col => ({
-//                 ...col,
-//                 isEditable: col.isEditable !== undefined ? col.isEditable : false // Default to false
-//             }));
-
-//             table.data.forEach(row => {
-//                 row.columns = row.columns.map((col, index) => ({
-//                     name: table.columns[index]?.name || `Column ${index + 1}`, // Column name
-//                     value: col.value || "", // Actual cell value
-//                     type: table.columns[index]?.type || "text",
-//                     isEditable: table.columns[index]?.isEditable || false
-//                 }));
-//             });
-//         });
-//         console.log("✅ Tables processed successfully.");
-//         if (tables.length) {
-//             tables.forEach((table, index) => {
-//                 console.log(`✅ Table ${index + 1} Columns:`, table.columns.map(col => col.name));
-//             });
-//         }
-//         console.log("User Data passing:", req.session.user);
-//         console.log("Tables Data:", tables);
-//         console.log("Table Paths:", tables.map(table => `/table/save/${table._id}`));
-
-//         res.render("user/view-section", {
-//             section,
-//             user: req.session.user,
-//             tables,
-//             layout: "layout",
-//             headerType: "user-header",
-
-//         });
-
-
-//     } catch (err) {
-//         console.error("❌ Error in viewSection:", err);
-//         req.flash("error", "Something went wrong");
-//         res.redirect("/dashboard");
-//     }
-// };
 
 exports.viewSection = async (req, res) => {
-    console.log("Session Data:", req.session);
-    console.log("body:", req.params.id);
+    console.log("🔍 Session Data:", req.session);
+    console.log("📌 Section ID:", req.params.id);
 
     try {
         const section = await Section.findById(req.params.id);
@@ -199,59 +97,30 @@ exports.viewSection = async (req, res) => {
         }
 
         const userId = req.session.user.id;
-        console.log("useriddddddddddddd:", userId);
+        console.log("👤 User ID:", userId);
 
         let userTableData = await UserTableData.findOne({ section: section._id, user: userId }).populate("user").lean();
-
         let tables = [];
 
+        // 🟢 If user has a saved table, update with new admin columns/rows
         if (userTableData) {
             console.log("✅ User has a saved table:", userTableData);
-            console.log("🔄 userTable... :", JSON.stringify(userTableData, null, 2));
 
             let adminTable = await Table.findById(section._id).populate("section").lean();
-
             if (adminTable) {
                 userTableData = mergeUserTableWithAdmin(userTableData, adminTable);
             }
 
-            userTableData.columns = userTableData.columns.map(col => ({
-                ...col,
-                isEditable: col.isEditable !== undefined ? col.isEditable : false
-            }));
-
-            userTableData.data.forEach(row => {
-                row.columns = row.columns.map((col, index) => ({
-                    name: userTableData.columns[index]?.name || `Column ${index + 1}`,
-                    value: col.value || "",
-                    type: userTableData.columns[index]?.type || "text",
-                    isEditable: col.isEditable !== undefined ? col.isEditable : userTableData.columns[index]?.isEditable || false
-                }));
-            });
-
+            formatTableData(userTableData);
             tables.push(userTableData);
         }
 
-        console.log("❌ Checking for new tables...");
-        let newTables = await checkNewTables(userId, section._id);
+        // 🔄 Check for new tables the user hasn't saved yet
+        console.log("🔍 Checking for new tables...");
 
-        newTables.forEach(table => {
-            table.columns = table.columns.map(col => ({
-                ...col,
-                isEditable: col.isEditable !== undefined ? col.isEditable : false
-            }));
-
-            table.data.forEach(row => {
-                row.columns = row.columns.map((col, index) => ({
-                    name: table.columns[index]?.name || `Column ${index + 1}`,
-                    value: col.value || "",
-                    type: table.columns[index]?.type || "text",
-                    isEditable: col.isEditable !== undefined ? col.isEditable : userTableData.columns[index]?.isEditable || false
-                }));
-            });
-
-            tables.push(table);
-        });
+        let newTables = await checkNewTables(userId, section._id)
+        newTables.forEach(formatTableData);
+        tables.push(...newTables);
 
         if (!tables.length) {
             console.log("⚠️ No tables found. Redirecting...");
@@ -259,12 +128,12 @@ exports.viewSection = async (req, res) => {
             return res.redirect("/dashboard");
         }
 
-        console.log("✅ Tables processed successfully:", tables.map(t => t.name));
-        console.log("Table Data:", JSON.stringify(tables, null, 2));
+        console.log("📝processed table:", JSON.stringify(tables, null, 2));
+
         res.render("user/view-section", {
             section,
             user: req.session.user,
-            tables,  // 🔥 New tables are merged here!
+            tables,
             layout: "layout",
             headerType: "user-header",
         });
@@ -276,106 +145,139 @@ exports.viewSection = async (req, res) => {
     }
 };
 
+/**
+ * 🛠️ Merge user table with admin table:
+ * - Adds new admin columns to user's table.
+ * - Merges new rows from admin table if not present in user's table.
+ */
 const mergeUserTableWithAdmin = (userTableData, adminTable) => {
     let updatedTable = { ...userTableData };
 
-    let adminColumns = adminTable.columns.map(col => col.name);
-    let userColumns = userTableData.columns.map(col => col.name);
+    // Get column names as sets for faster lookup
+    let adminColumnNames = new Set(adminTable.columns.map(col => col.name));
+    let userColumnNames = new Set(userTableData.columns.map(col => col.name));
 
-    // Add new admin columns to user's saved table
-    adminColumns.forEach(colName => {
-        if (!userColumns.includes(colName)) {
-            updatedTable.columns.push({ name: colName, type: "text", isEditable: false });
+    // Add missing admin columns to user's table
+    adminTable.columns.forEach(col => {
+        if (!userColumnNames.has(col.name)) {
+            updatedTable.columns.push({ name: col.name, type: col.type || "text", isEditable: false });
         }
     });
 
     // Merge admin's new rows with user's saved rows
-    let updatedRows = [];
     let userRowsById = new Map(userTableData.data.map(row => [row.id, row]));
+    updatedTable.data = adminTable.data.map(adminRow => userRowsById.get(adminRow.id) || adminRow);
 
-    adminTable.data.forEach(adminRow => {
-        if (userRowsById.has(adminRow.id)) {
-            updatedRows.push(userRowsById.get(adminRow.id)); // Keep user's saved version
-        } else {
-            updatedRows.push(adminRow); // Add new admin row
-        }
-    });
-
-    updatedTable.data = updatedRows;
-
-    console.log("🔄 Merging User Table With Admin Table:", JSON.stringify(updatedTable, null, 2));
-
+    console.log("🔄 Merged User Table With Admin Table:", JSON.stringify(updatedTable, null, 2));
     return updatedTable;
 };
 
-
+/**
+ * 🔍 Check for new tables in the section that the user hasn't saved yet.
+ */
 const checkNewTables = async (userId, sectionId) => {
     try {
-        // Fetch all tables in the section
         const allTables = await Table.find({ section: sectionId }).lean();
-
-        // Fetch user's saved table (if exists)
         const userSavedTable = await UserTableData.findOne({ user: userId, section: sectionId }).lean();
 
-        // If user has not saved any table yet, return all tables as new
-        if (!userSavedTable) {
-            return allTables; // All tables are new
-        }
+        if (!userSavedTable) return allTables; // User has no saved table, return all tables.
 
-        // Get the saved table's ID
-        const savedTableId = userSavedTable.table.toString(); // Convert to string for comparison
+        const savedTableId = userSavedTable.table.toString();
+        return allTables.filter(table => table._id.toString() !== savedTableId);
 
-        // Filter out tables that the user has not saved
-        const newTables = allTables.filter(table => table._id.toString() !== savedTableId);
-
-        return newTables; // Return list of new tables
     } catch (error) {
         console.error("❌ Error checking new tables:", error);
         return [];
     }
 };
 
+/**
+ * 📝 Format table data:
+ * - Ensures columns have `isEditable`.
+ * - Ensures rows contain correct structure.
+ */
+
+const formatTableData = (table) => {
+    // Ensure columns are mapped correctly
+    table.columns = table.columns.map(col => ({
+        ...col,
+        isEditable: col.isEditable === true, // Ensure boolean
+    }));
+
+    // Iterate through rows to adjust column data
+    table.data.forEach(row => {
+        row.columns = row.columns.map(col => {
+            const matchingColumn = table.columns.find(tc => tc.name === col.columnName);
+
+            return {
+                name: col.columnName || "Unnamed Column",
+                value: col.value || "",  // Ensure value is present
+                type: col.type || matchingColumn?.type || "text",
+                isEditable: col.isEditable !== undefined ? col.isEditable : matchingColumn?.isEditable || false,
+            };
+        });
+    });
+};
+
+// const formatTableData = (table) => {
+//     table.columns = table.columns.map(col => ({
+//         ...col,
+//         isEditable: col.isEditable !== undefined ? col.isEditable : false
+//     }));
+
+//     table.data.forEach(row => {
+//         row.columns = row.columns.map((col, index) => ({
+//             name: table.columns[index]?.name || `Column ${index + 1}`,
+//             value: col.value !== undefined ? col.value : "",
+//             type: table.columns[index]?.type || "text",
+//             isEditable: col.isEditable !== undefined ? col.isEditable : table.columns[index]?.isEditable || false
+//         }));
+//     });
+// };
 
 exports.saveTable = async (req, res) => {
     console.log("Received Data:");
-    const data = req.body.columns;
-    console.log("colums data befor save", JSON.stringify(data, null, 2));
-    console.log("Columns Data:", req.body.columns);
-
+    const data = req.body;
+    console.log("Columns Data Before Save:", JSON.stringify(data, null, 2));
 
     try {
-        const { id } = req.params; // Corrected table ID access
-        const { tableDescription, data, sectionId } = req.body;
-        console.log("User ID:", req.session.user.id); // ✅ Log the user ID
-        if (!req.session.user) {
+        const { id } = req.params; // ✅ Extract table ID
+        const { tableDescription, data, sectionId } = req.body; // ✅ Extract sectionId
+        const userId = req.session.user?.id; // ✅ Extract user ID safely
+
+        if (!userId) {
             req.flash("error", "Please login first ❌");
             return res.redirect("/login");
         }
-        // ✅ Fetch the table from the database
-        const table = await Table.findById(id);
-        if (!table) {
-            return res.status(404).json({ error: "Table not found." });
-        }
-        table.columns = table.columns || [];
-        // **Extract unique column structure**
-        const columns = data[0]?.columns.map((col) => ({
+
+
+        // ✅ Extract unique column structure
+        const columns = data?.[0]?.columns.map(col => ({
             name: col.name,
             type: col.type || "text",
-            isEditable: col.isEditable === "true", // ✅ Convert "true"/"false" to boolean
+            isEditable: col.isEditable === "true",
+
         })) || [];
 
-        // Format and structure the data
+        // ✅ Format and structure the data
         const formattedData = data.map((row, rowIndex) => ({
             rowNumber: rowIndex + 1,
-            columns: row.columns.map((col, colIndex) => ({
-                columnName: col.name,
-                value: col.value,
-                type: col.type,
-                isEditable: table.columns[colIndex]?.isEditable ?? true, // ✅ Ensure boolean
-            })),
+            columns: row.columns.map((col) => {
+                // 🔹 Match column by name and ensure boolean conversion for isEditable
+                const columnConfig = columns.find(c => c.name === col.name);
+
+                return {
+                    columnName: col.name,
+                    value: col.value || col.radioValue || "",
+                    type: col.type || "text",
+                    isEditable: columnConfig ? !!columnConfig.isEditable : false  // ✅ Convert to boolean
+                };
+            }),
         }));
 
-        // Calculate total marks and percentage
+
+        console.log("formated data:", JSON.stringify(formattedData, null, 2));
+        // ✅ Calculate total marks and percentage
         let totalMarks = 0, maxMarks = 0;
         formattedData.forEach(row => {
             row.columns.forEach(col => {
@@ -386,14 +288,17 @@ exports.saveTable = async (req, res) => {
 
         const percentage = maxMarks > 0 ? ((totalMarks / maxMarks) * 100).toFixed(2) : 0;
 
-        // Find the existing table or create a new one
-        let userTableData = await UserTableData.findOne({ table: id });
-        console.log("Saving Data:", JSON.stringify(req.body, null, 2));
-
+        // ✅ Find or create user table data to prevent duplicates
+        let userTableData = await UserTableData.findOne({
+            table: id,
+            user: userId,
+            section: sectionId
+        });
 
         if (!userTableData) {
+            // Create new user table data
             userTableData = new UserTableData({
-                user: req.session.user.id, // Ensure user is logged in
+                user: userId,
                 section: sectionId,
                 table: id,
                 tableDescription,
@@ -405,6 +310,7 @@ exports.saveTable = async (req, res) => {
                 percentage
             });
         } else {
+            // Update existing user table data
             userTableData.tableDescription = tableDescription;
             userTableData.rowsCount = formattedData.length;
             userTableData.columns = columns;
@@ -416,12 +322,12 @@ exports.saveTable = async (req, res) => {
 
         await userTableData.save();
         req.flash("success", "Table data updated successfully ✅");
-        console.log("saved susss");
-        res.redirect(`/view-section/${sectionId}`); // Fixed redirect path
+        console.log("Saved successfully!");
+        res.redirect(`/view-section/${sectionId}`); // ✅ Ensure sectionId is defined
     } catch (error) {
         console.error("❌ Error:", error);
         req.flash("error", "Failed to update table data ❌");
-        res.redirect(`/view-section/${sectionId}`);
+        res.redirect(`/view-section/${sectionId || "fallback-section"}`); // ✅ Prevent crash if sectionId is missing
     }
 };
 
