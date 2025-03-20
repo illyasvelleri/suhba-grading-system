@@ -97,6 +97,10 @@
 
                             <input type="hidden" name="data[{{@../index}}][columns][{{@index}}][name]"
                                 value="{{this.name}}">
+                            <input type="hidden" name="data[{{@../index}}][columns][{{@index}}][type]"
+                                value="{{this.type}}">
+                            <input type="hidden" name="data[{{@../index}}][columns][{{@index}}][isEditable]"
+                                value="{{this.isEditable}}">
 
 
                             <input type="text" class="form-control form-control-sm"
@@ -106,23 +110,26 @@
                             {{else if (eq this.type "radio")}}
                             <div class="d-flex">
                                 <label class="form-check-label me-3">
+
                                     <input type="hidden" name="data[{{@../index}}][columns][{{@index}}][name]"
-                                        value="{{../this.name}}">
+                                        value="{{this.name}}">
+                                    <input type="hidden" name="data[{{@../index}}][columns][{{@index}}][type]"
+                                        value="{{this.type}}">
+                                    <input type="hidden" name="data[{{@../index}}][columns][{{@index}}][isEditable]"
+                                        value="{{this.isEditable}}">
+
                                     <input type="radio" class="form-check-input"
                                         name="data[{{@../index}}][columns][{{@index}}][value]" value="Yes" {{#if (eq
                                         this.value "Yes" )}}checked{{/if}} {{#unless
-                                        this.isEditable}}readonly{{/unless}}> Yes
+                                        this.isEditable}}disabled{{/unless}}> Yes
                                 </label>
                                 <label class="form-check-label">
-                                    <input type="hidden" name="data[{{@../index}}][columns][{{@index}}][name]"
-                                        value="{{../this.name}}">
                                     <input type="radio" class="form-check-input"
                                         name="data[{{@../index}}][columns][{{@index}}][value]" value="No" {{#if (eq
                                         this.value "No" )}}checked{{/if}} {{#unless
-                                        this.isEditable}}readonly{{/unless}}> No
+                                        this.isEditable}}disabled{{/unless}}> No
                                 </label>
                             </div>
-
                             {{else if (eq this.type "mark")}}
                             <input type="hidden" name="data[{{@../index}}][columns][{{@index}}][name]"
                                 value="{{../this.name}}">
