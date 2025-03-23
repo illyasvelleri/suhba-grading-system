@@ -5,7 +5,7 @@ const userSchema = new mongoose.Schema({
     password: { type: String, required: true },  // Required Password
     category: {
         type: String,
-        enum: ["below20", "below50", "above50"]
+        enum: ["below-20", "below-50", "above-50"]
     },
     studentCount: { type: Number, default: 0 }, // New Field
     role: { type: String, enum: ["admin", "user"], default: "user" }
