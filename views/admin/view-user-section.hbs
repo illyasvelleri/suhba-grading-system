@@ -1,0 +1,17 @@
+<div class="container-fluid">
+    <div class="container my-5">
+        <h2>Grading Sections for {{user.username}}</h2>
+        <div class="row g-4 mt-3">
+            {{#each sections}}
+            <div class="col-6 col-md-4 col-lg-3">
+                <form action="/admin/user/{{../user._id}}/section/{{this._id}}" method="GET">
+                    <button type="submit" class="btn btn-light w-100 section-btn shadow-sm py-4 border rounded-4">
+                        <div class="fw-bold fs-5">{{this.name}}</div>
+                        <div class="small text-muted">Number: {{this.number}}</div>
+                    </button>
+                </form>
+            </div>
+            {{/each}}
+        </div>
+    </div>
+</div>
