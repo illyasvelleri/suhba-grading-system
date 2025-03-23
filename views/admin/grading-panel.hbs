@@ -1,0 +1,193 @@
+<style>
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 20px;
+    }
+
+    th,
+    td {
+        border: 1px solid #ccc;
+        padding: 8px;
+        text-align: center;
+    }
+
+    th {
+        background: #f5f5f5;
+    }
+
+    input[type="text"],
+    input[type="number"],
+    select {
+        width: 100%;
+        padding: 5px;
+        border-radius: 10px;
+    }
+
+    input[type="radio"] {
+        margin: 0 5px;
+    }
+
+    .total-box {
+        text-align: right;
+        font-weight: bold;
+        padding: 10px;
+        background: #f5f5f5;
+    }
+</style>
+<div class="container-fluid">
+    <div class="container my-5">
+        <h2>Tables for {{section.name}} of {{user.username}}</h2>
+
+        {{!-- Display Flash Messages --}}
+        {{#if messages.success}}
+        <div class="alert alert-success">{{messages.success}}</div>
+        {{/if}}
+        {{#if messages.error}}
+        <div class="alert alert-danger">{{messages.error}}</div>
+        {{/if}}
+
+        {{#if tables.length}}
+        {{#each tables}}
+        <form action="/admin/user-grade/save/{{this._id}}/user/{{../user._id}}" method="POST" class="container mt-4 pb-5">
+            <p>Table : {{this._id}}</p>
+            <input type="hidden" name="sectionId" value="{{section._id}}">
+            <input type="hidden" name="userId" value="{{../user._id}}">
+
+            <p>✅ Logged in as: {{user.username}}</p>
+            <p>✅ section name: {{../section.name}}</p>
+
+            <!-- Table Description Start -->
+            <div class=" form-group mb-4 bg-white w-100 shadow-lg py-4 px-3 border-0 rounded-4">
+                <label class="fw-bold text-secondary mb-2">Table Description:</label>
+                <textarea name="tableDescription" class="form-control shadow-none" rows="3"
+                    placeholder="Enter Table Description">{{table.tableDescription}}</textarea>
+            </div>
+            <!-- Table Description End -->
+
+            <div class="table-responsive">
+                <table class="table table-borderless table-hover">
+                    <thead class="bg-light">
+                        <tr>
+                            <th class="fw-bold">Row Number</th>
+                            {{#each this.columns}}
+                            <th class="fw-bold">
+                                <input type="text" class="form-control form-control-sm" name="columns[{{@index}}][name]"
+                                    value="{{this.name}}" required readonly>
+
+                                <!-- Hidden Input to Store isEditable -->
+                                <input type="hidden" name="columns[{{@index}}][isEditable]"
+                                    value="{{#if this.isEditable}}true{{else}}false{{/if}}">
+
+                            </th>
+                            {{/each}}
+
+                        </tr>
+                    </thead>
+                    <tbody>
+
+
+
+                        {{#each this.data}}
+                        <tr class="align-middle">
+                            <td class="fw-bold">{{this.rowNumber}}</td>
+                            {{#each this.columns}}
+                            <td>
+                                <div class="input-box mt-2">
+                                    {{#if (eq this.type "text")}}
+
+                                    <input type="hidden" name="data[{{@../index}}][columns][{{@index}}][name]"
+                                        value="{{this.name}}">
+                                    <input type="hidden" name="data[{{@../index}}][columns][{{@index}}][type]"
+                                        value="{{this.type}}">
+                                    <input type="hidden" name="data[{{@../index}}][columns][{{@index}}][isEditable]"
+                                        value="{{this.isEditable}}">
+
+
+                                    <input type="text" class="form-control form-control-sm"
+                                        name="data[{{@../index}}][columns][{{@index}}][value]" value="{{this.value}}"
+                                        {{#unless this.isEditable}}readonly{{/unless}}>
+
+                                    {{else if (eq this.type "radio")}}
+                                    <div class="d-flex">
+                                        <label class="form-check-label me-3">
+
+                                            <input type="hidden" name="data[{{@../index}}][columns][{{@index}}][name]"
+                                                value="{{this.name}}">
+                                            <input type="hidden" name="data[{{@../index}}][columns][{{@index}}][type]"
+                                                value="{{this.type}}">
+                                            <input type="hidden"
+                                                name="data[{{@../index}}][columns][{{@index}}][isEditable]"
+                                                value="{{this.isEditable}}">
+
+                                            <input type="radio" class="form-check-input"
+                                                name="data[{{@../index}}][columns][{{@index}}][value]" value="Yes" {{#if
+                                                (eq this.value "Yes" )}}checked{{/if}} {{#unless
+                                                this.isEditable}}disabled{{/unless}}> Yes
+                                        </label>
+                                        <label class="form-check-label">
+                                            <input type="radio" class="form-check-input"
+                                                name="data[{{@../index}}][columns][{{@index}}][value]" value="No" {{#if
+                                                (eq this.value "No" )}}checked{{/if}} {{#unless
+                                                this.isEditable}}disabled{{/unless}}> No
+                                        </label>
+                                    </div>
+                                    {{else if (eq this.type "mark")}}
+                                    <input type="hidden" name="data[{{@../index}}][columns][{{@index}}][name]"
+                                        value="{{../this.name}}">
+                                    <input type="hidden" name="data[{{@../index}}][columns][{{@index}}][type]"
+                                        value="{{this.type}}">
+                                    <input type="hidden" name="data[{{@../index}}][columns][{{@index}}][isEditable]"
+                                        value="{{this.isEditable}}">
+
+
+                                    <input type="number" class="form-control form-control-sm"
+                                        name="data[{{@../index}}][columns][{{@index}}][value]" value="{{this.value}}"
+                                        oninput="calculateTotal()" {{#unless this.isEditable}}readonly{{/unless}}>
+
+                                    {{else if (eq this.type "max-mark")}}
+                                    <input type="hidden" name="data[{{@../index}}][columns][{{@index}}][name]"
+                                        value="{{../this.name}}">
+                                    <input type="hidden" name="data[{{@../index}}][columns][{{@index}}][type]"
+                                        value="{{this.type}}">
+                                    <input type="hidden" name="data[{{@../index}}][columns][{{@index}}][isEditable]"
+                                        value="{{this.isEditable}}">
+
+                                    <input type="number" class="form-control form-control-sm"
+                                        name="data[{{@../index}}][columns][{{@index}}][value]" value="{{this.value}}"
+                                        oninput="calculateTotal()" {{#unless this.isEditable}}readonly{{/unless}}>
+
+                                    {{/if}}
+                                </div>
+                            </td>
+                            {{/each}}
+                        </tr>
+                        {{/each}}
+                    </tbody>
+
+                    <tfoot>
+                        <tr>
+                            <td colspan="100%">
+                                <div class="total-box alert alert-primary mt-3 mb-0">
+                                    Total Marks: {{table.totalMarks}}
+                                </div>
+                                <div class="total-box alert alert-secondary mt-3 mb-0">
+                                    Max Marks: {{table.maxMarks}}
+                                </div>
+                                <div class="total-box alert alert-success mt-3 mb-0">
+                                    Percentage: {{table.percentage}}%
+                                </div>
+                            </td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100 mt-3">Save Changes</button>
+        </form>
+        {{/each}}
+        {{else}}
+        <p>No tables available for this section.</p>
+        {{/if}}
+    </div>
+</div>
