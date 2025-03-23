@@ -1,0 +1,115 @@
+<style>
+    .section-btn {
+        transition: all 0.4s ease-in-out;
+        border-width: 3px;
+        /* White border thickness */
+    }
+
+    .section-btn:hover {
+        transform: scale(1.05);
+        background: #000;
+        /* Black Background */
+        color: #fff;
+        border-color: #fff;
+        /* White Border */
+        box-shadow: 0 0 20px rgba(255, 255, 255, 0.4);
+        /* White Shadow */
+    }
+
+    .section-btn[small]:hover {
+        color: #fff;
+
+        .custom-dropdown {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .custom-select {
+            width: 100%;
+            padding: 12px 16px;
+            border-radius: 8px;
+            border: 2px solid #ccc;
+            background: #fff;
+            color: #333;
+            font-size: 16px;
+            font-weight: 500;
+            appearance: none;
+            /* Remove default select styles */
+            cursor: pointer;
+            transition: all 0.3s ease-in-out;
+        }
+
+        .custom-select:focus {
+            border-color: #0d6efd;
+            box-shadow: 0 0 8px rgba(13, 110, 253, 0.5);
+            outline: none;
+        }
+
+        .filter-icon {
+            position: absolute;
+            right: 16px;
+            color: #666;
+            pointer-events: none;
+            /* Prevent interaction */
+        }
+
+        /* Hover Effect */
+        .custom-select:hover {
+            border-color: #0d6efd;
+        }
+    }
+</style>
+<div class="container-fluid">
+    <div class="container py-5">
+
+        <h2>All Users</h2>
+        <div class="col-md-6 position-relative">
+            <label class="form-label small text-muted ms-2">Filter by Category</label>
+            <div class="custom-dropdown">
+                <select id="filterCategory" class="form-control custom-select">
+                    <option value="all">All</option>
+                    <option value="below-20">Below 20</option>
+                    <option value="below-50">Below 50</option>
+                    <option value="above-50">Above 50</option>
+                </select>
+                <i class="fas fa-filter filter-icon"></i>
+            </div>
+        </div>
+        <div class="row g-3 mt-4" id="userContainer">
+            {{#each users}}
+            <div class="col-md-4 user-item" data-category="{{this.category}}">
+                <form action="/admin/view-user/{{_id}}" method="GET">
+                    <button type="submit"
+                        class="btn btn-white w-100 section-btn shadow-lg py-4 border-0 rounded-4 position-relative overflow-hidden">
+                        <div class="fw-bold fs-5">{{username}}</div>
+                        <div class="small">Category: {{category}}</div>
+                    </button>
+                </form>
+            </div>
+            {{/each}}
+        </div>
+    </div>
+</div>
+<script>
+    document.getElementById("filterCategory").addEventListener("change", function () {
+        let selectedCategory = this.value;
+        let users = document.querySelectorAll(".user-item");
+        let anyVisible = false;
+
+        users.forEach(user => {
+            if (selectedCategory === "all" || user.getAttribute("data-category") === selectedCategory) {
+                user.style.display = "block";
+                anyVisible = true;
+            } else {
+                user.style.display = "none";
+            }
+        });
+
+        // If no users are visible, show a message or handle it as necessary
+        if (!anyVisible) {
+            console.log("No users found for the selected category.");
+        }
+    });
+
+</script>
