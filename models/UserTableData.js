@@ -60,7 +60,10 @@ const UserTableDataSchema = new mongoose.Schema({
         default: ""
     }
 },
-    { timestamps: true }
+    {
+        timestamps: true,
+        collection: "usertabledata"
+    }, // Explicitly set the collection name
 );
 
 module.exports = mongoose.model("UserTableData", UserTableDataSchema);
