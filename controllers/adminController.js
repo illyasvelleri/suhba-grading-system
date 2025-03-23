@@ -1,34 +1,73 @@
 const Section = require("../models/Section");
 const Table = require("../models/Table");
+const User = require("../models/User");
+const UserTableData = require("../models/UserTableData");
 const bcrypt = require("bcryptjs");
+const mongoose = require("mongoose");
+
+
+
 
 // Admin Login
 const adminUsername = process.env.ADMIN_USERNAME;
 const plainPassword = process.env.ADMIN_PASSWORD;
 
 // Admin Login
+
+// Admin Login
 exports.login = async (req, res) => {
   const { username, password } = req.body;
 
-  if (username === adminUsername) {
-    const isMatch = await bcrypt.compare(password, plainPassword);
+  try {
+    if (username === adminUsername) {
+      const isMatch = await bcrypt.compare(password, plainPassword);
 
-    if (isMatch) {
-      req.session.isAdmin = true;
-      req.session.lastAccess = Date.now();
-      req.flash("success", "Welcome Admin 😊");
-      res.redirect("/admin/dashboard");
-    } else {
-      console.log("❌ Wrong Password:", password);
-      req.flash("error", "Invalid Username or Password ❌");
-      res.redirect("/admin");
+      if (isMatch) {
+        req.session.user = {
+          id: "admin",
+          username: adminUsername,
+          role: "admin",           // Set role as admin
+          lastAccess: Date.now(),
+        };
+        req.session.isAdmin = true;
+        await req.session.save();  // Save the session
+        req.flash("success", "Welcome Admin 😊");
+        return res.redirect("/admin/dashboard");
+      }
     }
-  } else {
-    console.log("❌ Wrong Username:", username);
+
+    console.log("❌ Invalid Admin Credentials");
     req.flash("error", "Invalid Username or Password ❌");
     res.redirect("/admin");
+
+  } catch (err) {
+    console.error("❌ Error in Admin Login:", err);
+    res.status(500).send("Error logging in");
   }
 };
+
+// exports.login = async (req, res) => {
+//   const { username, password } = req.body;
+
+//   if (username === adminUsername) {
+//     const isMatch = await bcrypt.compare(password, plainPassword);
+
+//     if (isMatch) {
+//       req.session.isAdmin = true;
+//       req.session.lastAccess = Date.now();
+//       req.flash("success", "Welcome Admin 😊");
+//       res.redirect("/admin/dashboard");
+//     } else {
+//       console.log("❌ Wrong Password:", password);
+//       req.flash("error", "Invalid Username or Password ❌");
+//       res.redirect("/admin");
+//     }
+//   } else {
+//     console.log("❌ Wrong Username:", username);
+//     req.flash("error", "Invalid Username or Password ❌");
+//     res.redirect("/admin");
+//   }
+// };
 
 
 // Admin Logout
@@ -195,11 +234,11 @@ exports.editTablePage = async (req, res) => {
 
 
 exports.updateTable = async (req, res) => {
-  console.log(req.body);
+
   try {
     const { columns, data } = req.body;
     const tableId = req.params.id;
-
+    console.log("datas for update table!", JSON.stringify(tableId, null, 2));
 
     // Convert req.body values to arrays if not already
     if (!Array.isArray(req.body.totalMarks)) {
@@ -288,5 +327,208 @@ exports.updateTable = async (req, res) => {
     console.log(err);
     req.flash("error", "Something Went Wrong 😔");
     res.redirect(`/admin/table/edit/${req.params.id}`);
+  }
+};
+
+
+
+exports.getAllUsers = async (req, res) => {
+  try {
+    // Fetch all users from the database
+    const users = await User.find().lean();
+
+    // Render the users in a view, adjust the view name and path as necessary
+    res.render("admin/view-users", {
+      users,
+      layout: "layout",
+      headerType: "admin-header",
+    });
+  } catch (err) {
+    console.error("Error fetching users:", err);
+    req.flash("error", "Failed to fetch users ❌");
+    res.status(500).send("Server Error");
+  }
+};
+
+exports.viewUserSection = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+    const sections = await Section.find().lean();
+    res.render("admin/view-user-section", {
+      user,
+      sections,
+      layout: "layout",
+      headerType: "admin-header",
+    });
+  } catch (err) {
+
+  }
+}
+
+
+
+exports.viewUserTable = async (req, res) => {
+  console.log("🔍 Session Data:", req.session);
+  console.log("📌 Section ID:", req.params.id);
+
+  try {
+    const sectionId = req.params.sectionId;
+    const userId = req.params.userId;
+
+    // Validate and convert to ObjectId
+    if (!mongoose.Types.ObjectId.isValid(sectionId) || !mongoose.Types.ObjectId.isValid(userId)) {
+      req.flash("error", "Invalid Section or User ID");
+      return res.redirect("/admin/dashboard");
+    }
+
+    const section = await Section.findById(sectionId);
+    console.log("reciveddddd: id: ", section);
+    if (!section) {
+      req.flash("error", "Section Not Found");
+      return res.redirect("/admin/dashboard");
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      req.flash("error", "User Not Found");
+      return res.redirect("/admin/dashboard");
+    }
+
+    // Ensure session user exists
+    if (!req.session.isAdmin) {
+      req.flash("error", "Session expired. Please log in again.");
+      return res.redirect("/admin/login");
+    }
+
+    const isAdmin = req.session.isAdmin;  // Check if user is admin
+    console.log("👤 Admin id:", isAdmin);
+
+    let userTableData = await UserTableData.findOne({ section: section._id, user: userId }).populate("user").lean();
+    let tables = [];
+
+    if (userTableData) {
+      console.log("✅ User has saved table data:", userTableData);
+      formatTableData(userTableData, isAdmin);
+      tables.push(userTableData);
+    } else {
+      console.log("🔄 Fetching default admin table...");
+      const adminTable = await Table.findOne({ section: section._id }).lean();
+      if (adminTable) {
+        formatTableData(adminTable, isAdmin);
+        tables.push(adminTable);
+      }
+    }
+
+    if (!tables.length) {
+      req.flash("error", "No tables available for this section.");
+      return res.redirect("/admin/dashboard");
+    }
+
+    console.log("📝 Processed table:", JSON.stringify(tables, null, 2));
+
+    res.render("admin/grading-panel", {
+      section,
+      user,
+      tables,
+      layout: "layout",
+      headerType: "admin-header",
+    });
+
+  } catch (err) {
+    console.error("❌ Error in viewSection:", err);
+    req.flash("error", "Something went wrong");
+    res.redirect("/admin/dashboard");
+  }
+};
+
+/**
+ * 📝 Format table data:
+ * - Ensure only 'max mark' is editable for admin.
+ */
+const formatTableData = (table, isAdmin) => {
+  table.columns = table.columns.map(col => ({
+    ...col,
+    isEditable: isAdmin && ["MARK", "MAX MARK"].includes(col.name),  // Editable for admin
+  }));
+
+  table.data.forEach(row => {
+    row.columns = row.columns.map(col => ({
+      name: col.columnName || "Unnamed Column",
+      value: col.value || "",
+      type: col.type || "text",
+      isEditable: isAdmin && ["MARK", "MAX MARK"].includes(col.columnName),  // Editable for admin
+    }));
+  });
+}
+
+
+// add grade for user
+exports.addGrade = async (req, res) => {
+  const { sectionId, data } = req.body;
+  const { userId, id } = req.params;
+  try {
+    // Validate Object IDs
+    if (!mongoose.Types.ObjectId.isValid(userId) || !mongoose.Types.ObjectId.isValid(sectionId) || !mongoose.Types.ObjectId.isValid(id)) {
+      req.flash("error", "Invalid User, Section, or Table ID");
+      return res.redirect("/admin/dashboard");
+    }
+    // Check if user and section exist
+    const user = await User.findById(userId);
+    const section = await Section.findById(sectionId);
+    console.log("user:::", user);
+    console.log("section:::", section);
+    if (!user) {
+      req.flash("error", "User Not Found");
+      return res.redirect("/admin/dashboard");
+    }
+
+    const userTableData = await UserTableData.findOne({
+      _id: id,
+      user: user,
+      section: section
+    }).populate("section");
+    console.log("userTable Data:::", userTableData);
+    if (!userTableData) {
+      req.flash("error", "User table data not found ❌");
+      console.log("User table data not found")
+      return res.redirect(`/admin/user/${userId}/section/${sectionId}`);
+    }
+
+    let totalMarks = 0, maxMarks = 0;
+
+    // Update only MARK and MAX MARK values
+    data.forEach((row, rowIndex) => {
+      row.columns.forEach(col => {
+        if (["MARK", "MAX MARK"].includes(col.name)) {
+          const userRow = userTableData.data[rowIndex];
+          const userCol = userRow.columns.find(c => c.columnName === col.name);
+
+          if (userCol) {
+            userCol.value = col.value;
+
+            if (col.name === "MARK") {
+              totalMarks += parseInt(col.value) || 0;
+            }
+            if (col.name === "MAX MARK") {
+              maxMarks += parseInt(col.value) || 0;
+            }
+          }
+        }
+      });
+    });
+
+    // Update percentage
+    userTableData.totalMarks = totalMarks;
+    userTableData.maxMarks = maxMarks;
+    userTableData.percentage = maxMarks > 0 ? ((totalMarks / maxMarks) * 100).toFixed(2) : 0;
+
+    await userTableData.save();
+
+    req.flash("success", "Marks updated successfully ✅");
+    res.redirect(`/admin/user/${userId}/section/${sectionId}`);
+  } catch (error) {
+    console.error("❌ Error:", error);
+    req.flash("error", "Failed to update marks ❌");
+    res.redirect(`/admin/user/${userId}/section/${sectionId} || "fallback-section"}`);
   }
 };
