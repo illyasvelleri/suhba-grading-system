@@ -30,4 +30,13 @@ router.get("/table/edit/:id", isAdmin, adminController.editTablePage);
 
 router.post("/table/update/:id", isAdmin, adminController.updateTable);
 
+
+router.get("/view-users", isAdmin, adminController.getAllUsers);
+
+router.get("/view-user/:id", isAdmin, adminController.viewUserSection);
+
+router.get("/user/:userId/section/:sectionId", isAdmin, adminController.viewUserTable);
+
+router.post("/user-grade/save/:id/user/:userId", isAdmin, adminController.addGrade);
+
 module.exports = router;
