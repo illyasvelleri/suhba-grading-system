@@ -2,12 +2,14 @@
     .section-btn {
         transition: all 0.4s ease-in-out;
         border-width: 3px;
-        /* White border thickness */
+        background: var(--primary-gradient);
+        color: var(--white);
+  
     }
 
     .section-btn:hover {
         transform: scale(1.05);
-        background: #000;
+        background: var(--primary-color);
         /* Black Background */
         color: #fff;
         border-color: #fff;
@@ -21,7 +23,7 @@
     }
 
     input:focus {
-        border-color: #0d6efd;
+        border-color: var(--black);
         box-shadow: 0 0 8px rgba(13, 110, 253, 0.5);
     }
 
@@ -47,7 +49,7 @@
     }
 
     .custom-select:focus {
-        border-color: #0d6efd;
+        border-color: var(--black);
         box-shadow: 0 0 8px rgba(13, 110, 253, 0.5);
         outline: none;
     }
@@ -62,7 +64,7 @@
 
     /* Hover Effect */
     .custom-select:hover {
-        border-color: #0d6efd;
+        border-color: var(--white);
     }
 </style>
 

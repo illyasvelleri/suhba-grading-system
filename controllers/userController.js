@@ -71,15 +71,46 @@ exports.logout = (req, res) => {
 
 
 // Display Dashboard
+// exports.dashboard = async (req, res) => {
+//     if (!req.session.user) {
+//         req.flash("error", "Please login first ❌");
+//         return res.redirect("/login");
+//     }
+//     // Fetch user data
+//     const sections = await Section.find().lean();
+//     res.render("user/dashboard", { user: req.session.user, sections, layout: 'layout', headerType: 'user-header' });
+// };
+// Display Dashboard
 exports.dashboard = async (req, res) => {
     if (!req.session.user) {
         req.flash("error", "Please login first ❌");
         return res.redirect("/login");
     }
-    // Fetch user data
-    const sections = await Section.find().lean();
-    res.render("user/dashboard", { user: req.session.user, sections, layout: 'layout', headerType: 'user-header' });
+
+    try {
+        // Fetch the logged-in user
+        const user = await User.findById(req.session.user.id).lean();
+        if (!user) {
+            req.flash("error", "User not found ❌");
+            return res.redirect("/login");
+        }
+
+        // Fetch sections matching the user's category
+        const matchingSections = await Section.find({ sectionCategory: user.category }).lean();
+
+        res.render("user/dashboard", {
+            user,
+            sections: matchingSections,
+            layout: 'layout',
+            headerType: 'user-header'
+        });
+    } catch (error) {
+        console.error("Error fetching user or sections:", error);
+        req.flash("error", "Failed to load dashboard ❌");
+        res.redirect("/login");
+    }
 };
+
 
 
 
@@ -236,20 +267,34 @@ const formatTableData = (table) => {
 // };
 
 exports.saveTable = async (req, res) => {
-    console.log("Received Data:");
-    const data = req.body;
-    console.log("Columns Data Before Save:", JSON.stringify(data, null, 2));
+    const { id } = req.params; // ✅ Extract table ID
+    const { tableDescription, data, sectionId } = req.body; // ✅ Extract sectionId
+    const userId = req.session.user?.id; // ✅ Extract user ID safely
 
     try {
-        const { id } = req.params; // ✅ Extract table ID
-        const { tableDescription, data, sectionId } = req.body; // ✅ Extract sectionId
-        const userId = req.session.user?.id; // ✅ Extract user ID safely
+        // Validate Object IDs
+        if (!mongoose.Types.ObjectId.isValid(userId) || !mongoose.Types.ObjectId.isValid(sectionId) || !mongoose.Types.ObjectId.isValid(id)) {
+            req.flash("error", "Invalid User, Section, or Table ID");
+            return res.redirect("/dashboard");
+        }
+        // Check if user and section exist
+        const user = await User.findById(userId);
+        const section = await Section.findById(sectionId);
 
-        if (!userId) {
+        console.log("user:::", user);
+        console.log("section:::", section);
+
+        if (!user) {
             req.flash("error", "Please login first ❌");
             return res.redirect("/login");
         }
+    
 
+        // Validate tableData
+        if (!Array.isArray(data) || data.length === 0) {
+            req.flash("error", "No data provided to save ❌");
+            return res.redirect(`/view-section/${sectionId}`);
+        }
 
         // ✅ Extract unique column structure
         const columns = data?.[0]?.columns.map(col => ({
@@ -258,6 +303,7 @@ exports.saveTable = async (req, res) => {
             isEditable: col.isEditable === "true",
 
         })) || [];
+
 
         // ✅ Format and structure the data
         const formattedData = data.map((row, rowIndex) => ({
@@ -288,18 +334,21 @@ exports.saveTable = async (req, res) => {
 
         const percentage = maxMarks > 0 ? ((totalMarks / maxMarks) * 100).toFixed(2) : 0;
 
+        console.log("dtassssssdsagd:", id, userId, sectionId);
         // ✅ Find or create user table data to prevent duplicates
         let userTableData = await UserTableData.findOne({
-            table: id,
-            user: userId,
-            section: sectionId
-        });
+            _id: id,
+            user: user,
+            section: section
+        }).populate("section");
+        console.log("Existing User Table Data Found:", userTableData);
 
         if (!userTableData) {
             // Create new user table data
+            console.log("Creating new user table data...");
             userTableData = new UserTableData({
-                user: userId,
-                section: sectionId,
+                user: user,
+                section: section,
                 table: id,
                 tableDescription,
                 rowsCount: formattedData.length,
@@ -311,6 +360,7 @@ exports.saveTable = async (req, res) => {
             });
         } else {
             // Update existing user table data
+            console.log("Updating existing user table data...");
             userTableData.tableDescription = tableDescription;
             userTableData.rowsCount = formattedData.length;
             userTableData.columns = columns;
@@ -358,13 +408,21 @@ exports.updateProfile = async (req, res) => {
     }
 
     try {
-        const { username, category, studentCount } = req.body;
+        const { username, category, studentCount, profileImageURL, googleMapsLink } = req.body;
+
+        // Validate Google Maps embed link
+        if (googleMapsLink && !googleMapsLink.startsWith("https://www.google.com/maps/embed")) {
+            req.flash("error", "Invalid Google Maps embed link! Use the embed link format.");
+            return res.redirect("/profile");
+        }
 
         // Update user details
         await User.findByIdAndUpdate(req.session.user.id, {
             username,
             category,
-            studentCount
+            studentCount,
+            profileImageURL,
+            googleMapsLink
         });
 
         // Update session with new username

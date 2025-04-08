@@ -1,9 +1,90 @@
-<form action="/register" method="POST">
-    <label>Name:</label>
-    <input type="text" name="username" required><br>
+<style>
+    .container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        padding: 20px;
+        box-sizing: border-box;
+    }
 
-    <label>Password:</label>
-    <input type="password" name="password" required><br>
+    .login-container {
+        background-color: var(--white);
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        padding: 30px 40px;
+        width: 100%;
+        max-width: 350px;
+        text-align: center;
+        transition: transform 0.3s, box-shadow 0.3s;
+    }
 
-    <button type="submit">Register</button>
-</form>
+    h2 {
+        margin-bottom: 20px;
+        color: var(--primary-color);
+        font-weight: bold;
+        font-size: 24px;
+    }
+
+    form {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    label {
+        text-align: left;
+        margin-bottom: 5px;
+        color: var(--primary-color);
+        font-weight: bold;
+    }
+
+    input {
+        padding: 10px;
+        border-radius: 5px;
+        border: 1px solid var(--accent-color);
+        background-color: var(--input-bg);
+        color: var(--text-color);
+        font-size: 14px;
+        margin-bottom: 10px;
+        outline: none;
+        transition: box-shadow 0.3s;
+    }
+
+    input:focus {
+        border-color: var(--accent-color);
+        box-shadow: 0 0 5px rgba(186, 96, 160, 0.5);
+    }
+
+    button {
+        padding: 10px;
+        background-color: var(--accent-color);
+        border: none;
+        border-radius: 5px;
+        color: var(--white);
+        font-weight: bold;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+
+    button:hover {
+        background-color: var(--primary-color);
+    }
+</style>
+<div class="container">
+    <div class="login-container">
+        <h2>Register</h2>
+        <form action="/register" method="POST">
+            <label for="username">Name:</label>
+            <input type="text" id="username" name="username" placeholder="Enter your name" required>
+
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" placeholder="Enter your password" required>
+
+            <button type="submit">Register</button>
+        </form>
+        <p class="mt-3 text-secondary small">Already have an account?
+            <a href="/login" class="text-primary text-decoration-none">Login Here</a>
+        </p>
+    </div>
+</div>

@@ -1,4 +1,4 @@
-<style>
+{{!-- <style>
     .img {
         display: flex;
         justify-content: center;
@@ -31,32 +31,217 @@
     <div class="row">
         <!-- Sidebar Toggle Button for Mobile -->
         <div class="d-md-none d-flex justify-content-between align-items-center p-2">
-            <button class="btn btn-primary" id="toggleSidebar">☰ Menu</button>
             <a href="/user/logout" class="btn btn-danger">Logout</a>
         </div>
 
         <!-- Left Sidebar -->
         <div class="col-lg-3 col-md-4 bg-white rounded shadow-sm my-5 d-none d-md-block sidebar">
             <div class="profile text-center p-4">
-                <div class="img">
+                <!-- Profile Image -->
+                <div class="img mb-3">
                     <img src="https://imgs.search.brave.com/d7ISQGe5nIf9MaaxWogEPwhX2OGMRrqv0Djn_gsKZHM/rs:fit:500:0:0:0/g:ce/aHR0cHM6Ly9pbWcu/ZnJlZXBpay5jb20v/ZnJlZS1waG90by9o/YW5kc29tZS1zbWls/aW5nLW1hbi1sb29r/aW5nLXdpdGgtZGlz/YmVsaWVmXzE3NjQy/MC0xOTU5MS5qcGc_/c2VtdD1haXNfaHli/cmlk"
-                        class="profile-img rounded-circle mb-3 border shadow-sm" alt="User Avatar">
+                        class="profile-img rounded-circle border shadow-sm" alt="User Avatar"
+                        style="width: 100px; height: 100px; object-fit: cover;">
                 </div>
 
+                <!-- Profile Details -->
                 <div class="profile-content">
-                    <h3 class="fw-bold">{{user.username}}</h3>
-                    <p class="text-muted">Category: {{user.category}}</p>
+                    <h5 class="fw-bold">{{user.username}}</h5>
+                    <span class="badge bg-secondary text-white px-3 py-1 mb-2">Category: {{user.category}}</span>
 
                     <!-- Google Maps Preview -->
                     {{#if user.googleMapsLink}}
-                    <iframe src="{{user.googleMapsLink}}" width="100%" height="150" class="rounded border"
-                        allowfullscreen></iframe>
+                    <div class="map-container mt-3">
+                        <iframe src="{{user.googleMapsLink}}" width="100%" height="150" class="rounded border"
+                            style="border: 0;" allowfullscreen="" loading="lazy"></iframe>
+                    </div>
                     {{else}}
-                    <p class="text-muted">No location added</p>
+                    <p class="text-muted mt-2">No location added</p>
                     {{/if}}
                 </div>
 
+                <!-- Edit Profile Button -->
                 <a href="/profile" class="btn btn-primary w-100 mt-3">Edit Profile</a>
+            </div>
+        </div>
+
+
+        <!-- Main Content -->
+        <div class="col-lg-9 col-md-8 p-5">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="fw-bold">Welcome, {{user.username}}!</h1>
+                <a href="/user/logout" class="btn btn-danger d-none d-md-block">Logout</a>
+            </div>
+            <p class="text-muted">This is your dashboard.</p>
+
+            <div class="row g-4 mt-3">
+                {{#each sections}}
+                <div class="col-md-6 col-lg-4">
+                    <form action="/view-section/{{this._id}}" method="GET">
+                        <button type="submit" class="btn btn-light w-100 section-btn shadow-sm py-4 border rounded-4">
+                            <div class="fw-bold fs-5">{{this.name}}</div>
+                            <div class="small text-muted">Number: {{this.number}}</div>
+                        </button>
+                    </form>
+                </div>
+                {{/each}}
+            </div>
+        </div>
+    </div>
+</div> --}}
+
+<style>
+    .container-fluid {
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: var(--white);
+        padding: 30px;
+    }
+
+    .sidebar {
+        background-color: #fff;
+        padding: 30px;
+        border-radius: 20px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        text-align: center;
+    }
+
+    .profile {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .img {
+        width: 120px;
+        height: 120px;
+        margin-bottom: 15px;
+        overflow: hidden;
+        border-radius: 50%;
+        border: 4px solid var(--online-green);
+        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    .profile-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .profile h5 {
+        margin-bottom: 10px;
+        font-weight: bold;
+        color: #333;
+    }
+
+    .badge {
+        background-color: var(--online-green);
+        color: #fff;
+        font-size: 14px;
+        margin-bottom: 15px;
+        padding: 5px 10px;
+        border-radius: 20px;
+    }
+
+    .map-container {
+        margin-top: 15px;
+        border-radius: 10px;
+        overflow: hidden;
+        border: 2px dotted var(--black);
+    }
+
+    .btn-primary {
+        background: var(--black);
+        color: #fff;
+        border: none;
+        margin-top: 20px;
+        padding: 10px;
+        border-radius: 20px;
+        transition: background-color 0.3s;
+        width: 100%;
+    }
+
+    .btn-primary:hover {
+        background: var(--primary-gradient);
+    }
+
+    .main-content {
+        padding: 40px;
+    }
+
+    .section-btn {
+        background: var(--primary-gradient);
+        border: 2px solid #ddd;
+        border-radius: 20px;
+        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+        color: var(--white);
+        transition: all 0.3s;
+        padding: 20px;
+    }
+
+    .section-btn:hover {
+        background: var(--accent-color);
+        color: #fff;
+        transform: translateY(-5px);
+        box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .welcome-text {
+        font-weight: bold;
+        font-size: 28px;
+        margin-bottom: 15px;
+        color: #333;
+    }
+
+    .logout-btn {
+        background-color: #dc3545;
+        color: #fff;
+        padding: 8px 16px;
+        border-radius: 20px;
+        text-decoration: none;
+        transition: background-color 0.3s;
+    }
+
+    .logout-btn:hover {
+        background-color: #a71d2a;
+    }
+
+    @media (max-width: 768px) {
+        .sidebar {
+            display: none;
+        }
+
+        .main-content {
+            margin-top: 20px;
+        }
+    }
+</style>
+
+<div class="container-fluid">
+    <div class="row w-100">
+        <!-- Sidebar -->
+        <div class="col-lg-3 col-md-4 sidebar">
+            <div class="profile">
+                <!-- Profile Image -->
+                <div class="img">
+                    <img src="{{user.profileImageURL}}" class="profile-img" alt="User Avatar">
+                </div>
+                <h5>{{user.username}}</h5>
+                <span class="badge">Category: {{user.category}}</span>
+
+                <!-- Google Maps Preview -->
+                {{#if user.googleMapsLink}}
+                <div class="map-container">
+                    <iframe src="{{user.googleMapsLink}}" width="100%" height="150" frameborder="0" allowfullscreen
+                        loading="lazy"></iframe>
+                </div>
+                {{else}}
+                <p class="text-muted">No location added</p>
+                {{/if}}
+
+                <a href="/profile" class="btn btn-primary">Edit Profile</a>
             </div>
         </div>
 
@@ -83,9 +268,3 @@
         </div>
     </div>
 </div>
-
-<script>
-    document.getElementById("toggleSidebar").addEventListener("click", function () {
-        document.querySelector(".sidebar").classList.toggle("d-none");
-    });
-</script>

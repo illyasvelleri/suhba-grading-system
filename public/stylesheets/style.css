@@ -1,8 +1,37 @@
-body {
-  font-family: 'General Sans', sans-serif;
-  padding: 0px 50px;
+:root {
+  --primary-gradient: linear-gradient(135deg, #323374, #ba60a0);
+  --primary-color: #323374;
+  /* Deep Purple */
+  --accent-color: #ba60a0;
+  /* Vibrant Pink */
+  --black: #000000;
+  --white: #f4f4f9;
+  --online-green: #3bb143;
 }
 
-a {
-  color: #00B7FF;
+/* style.css */
+.bg-gradient {
+  background: var(--primary-gradient);
+  color: var(--white);
+}
+
+.text-black {
+  color: var(--black);
+}
+
+.text-white {
+  color: var(--white);
+}
+
+.btn {
+  background-color: var(--accent-color);
+  color: var(--white);
+  padding: 10px 20px;
+  border: none;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.btn:hover {
+  background-color: var(--primary-color);
 }

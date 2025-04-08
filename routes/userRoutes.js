@@ -7,7 +7,7 @@ const { isUser } = require('../middlewares/auth');
 
 // /* GET home page. */
 router.get('/', function (req, res, next) {
-  res.send('curently working for this');
+  res.render('index');
 });
 
 // User Registration Page Render

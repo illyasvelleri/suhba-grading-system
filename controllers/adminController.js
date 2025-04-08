@@ -477,6 +477,7 @@ exports.addGrade = async (req, res) => {
     const section = await Section.findById(sectionId);
     console.log("user:::", user);
     console.log("section:::", section);
+    
     if (!user) {
       req.flash("error", "User Not Found");
       return res.redirect("/admin/dashboard");

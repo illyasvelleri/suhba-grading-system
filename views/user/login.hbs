@@ -1,10 +1,104 @@
-<h1>User Login</h1>
-<form action="/login" method="POST">
-    <label>Name:</label>
-    <input type="text" name="username" required><br>
+<style>
+    .container-fluid {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+        /* Gradient Background */
+        padding: 20px;
+        box-sizing: border-box;
+    }
 
-    <label>Password:</label>
-    <input type="password" name="password" required><br>
+    .login-container {
+        background-color: var(--white);
+        border-radius: 10px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        padding: 30px;
+        width: 350px;
+        text-align: center;
+    }
 
-    <button type="submit">Login</button>
-</form>
+    h1 {
+        margin-bottom: 20px;
+        color: var(--primary-start);
+        font-weight: bold;
+    }
+
+    form {
+        display: flex;
+        flex-direction: column;
+    }
+
+    label {
+        text-align: left;
+        margin-bottom: 5px;
+        color: var(--primary-start);
+        font-weight: bold;
+    }
+
+    input {
+        margin-bottom: 15px;
+        padding: 10px;
+        border-radius: 5px;
+        border: 1px solid var(--primary-end);
+        background-color: var(--input-bg);
+        font-size: 14px;
+    }
+
+    button {
+        padding: 10px;
+        background-color: var(--accent-color);
+        border: none;
+        border-radius: 5px;
+        color: var(--white);
+        font-weight: bold;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+
+    button:hover {
+        background-color: var(--primary-end);
+    }
+
+    input:focus {
+        outline: none;
+        border-color: var(--accent-color);
+        box-shadow: 0 0 5px rgba(186, 96, 160, 0.5);
+    }
+
+    p {
+        margin-top: 10px;
+        font-size: 14px;
+    }
+
+    a {
+        color: var(--accent-color);
+        text-decoration: none;
+    }
+
+    a:hover {
+        color: var(--primary-color);
+        text-decoration: underline;
+    }
+</style>
+<div class="container-fluid">
+    <div class="login-container">
+        <h1>User Login</h1>
+        <form action="/login" method="POST">
+            <label for="username">Name:</label>
+            <input type="text" id="username" name="username" placeholder="Enter user name" required>
+
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" placeholder="Enter your password" required>
+
+            <button type="submit">Login</button>
+        </form>
+        <p class="mt-3 text-secondary small">Forgot Password?
+            <a href="#" class="text-danger text-decoration-none">Click Here</a>
+        </p>
+        <p class="mt-2 text-secondary small">Don't have an account?
+            <a href="/register" class="text-primary text-decoration-none">Register Here</a>
+        </p>
+    </div>
+</div>
